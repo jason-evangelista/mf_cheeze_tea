@@ -1,4 +1,4 @@
-import { Admin } from '@/types/Admin';
+import { JwtDecodeValue } from '@/types/JwtDecodeValue';
 import jwt from 'jsonwebtoken';
 
 type JwtGenerator = {
@@ -22,7 +22,7 @@ const jwtGenerate = async ({ payload, secret }: JwtGenerator) => {
   return result;
 };
 const jwtDecode = async ({ secret, token }: JwtDecode) => {
-  const result = await new Promise<Admin | null>((resolve, reject) => {
+  const result = await new Promise<JwtDecodeValue | null>((resolve, reject) => {
     jwt.verify(
       token,
       secret,
@@ -31,7 +31,7 @@ const jwtDecode = async ({ secret, token }: JwtDecode) => {
       },
       async (err, result) => {
         if (err) return reject('Unauthorized');
-        return resolve(result as Admin);
+        return resolve(result as JwtDecodeValue);
       }
     );
   });

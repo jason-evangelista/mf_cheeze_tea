@@ -1,5 +1,5 @@
-import Button from '@/components/Button';
-import Input from '@/components/Input';
+import Button from '@/components/common/Button';
+import Input from '@/components/common/Input';
 import { SignInSchema, signInSchema } from '@/schema/schema';
 import { useLoginUserMutation } from '@/services/userService';
 import { parseErrorResponse } from '@/utils/parseErrorResponse';
@@ -8,6 +8,8 @@ import jsCookie from 'js-cookie';
 import Head from 'next/head';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+
+const COOKIE_NAME = process.env.NEXT_PUBLIC_COOKIE_NAME ?? '';
 
 const SignIn = () => {
   const {
@@ -27,8 +29,8 @@ const SignIn = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      console.log(data);
-      jsCookie.set('mfcheezetea_session', data?.data?.token ?? '');
+      jsCookie.set(COOKIE_NAME, data?.data?.token ?? '');
+      window.location.reload();
     }
     if (isError) {
       parseErrorResponse(error);
