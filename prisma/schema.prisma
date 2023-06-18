@@ -12,8 +12,12 @@ datasource db {
 
 model Account {
   id         String   @id @default(cuid())
-  name       String   @db.VarChar(255)
+  username   String   @unique @db.VarChar(255)
+  email      String?  @unique @db.VarChar(255)
   password   String   @db.LongText
+  token      String?  @db.LongText
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@map("accounts")
 }
