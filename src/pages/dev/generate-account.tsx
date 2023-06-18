@@ -1,4 +1,4 @@
-import Button from '@/components/Button';
+import Button from '@/components/common/Button';
 import Input from '@/components/Input';
 import SeoContainer from '@/components/SeoContainer';
 import { GenerateAccountSchema, generateAccountSchema } from '@/schema/schema';

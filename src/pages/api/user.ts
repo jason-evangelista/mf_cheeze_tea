@@ -1,5 +1,6 @@
+import userSelectedValue from '@/constants/returnUser';
 import { GenerateAccountSchema, SignInSchema } from '@/schema/schema';
-import { jwtGenerate } from '@/utils/jwtService';
+import { jwtDecode, jwtGenerate } from '@/utils/jwtService';
 import { prismaClient } from '@/utils/prismaClient';
 import bcrypt from 'bcryptjs';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -73,8 +74,6 @@ const userApi = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       });
 
-      console.log(user);
-
       if (user) {
         const token = await jwtGenerate({
           payload: { id: user?.id },
@@ -94,7 +93,33 @@ const userApi = async (req: NextApiRequest, res: NextApiResponse) => {
 
       return res.status(400).json({ message: 'Error creating user.' });
     }
+
+    // Fetch user with header token
+    if (req.method === 'GET') {
+      const getAuthHeader = req.headers.authorization;
+
+      if (!getAuthHeader)
+        return res.status(400).json({ message: 'Not authorized', user: null });
+
+      const getJwtDecoded = await jwtDecode({
+        secret: process.env.JWT_SECRET ?? '',
+        token: getAuthHeader ?? '',
+      });
+
+      const findUser = await prismaClient.account.findUnique({
+        where: {
+          id: getJwtDecoded?.id,
+        },
+        select: userSelectedValue,
+      });
+
+      if (!findUser)
+        return res.status(404).json({ message: 'Not authorized', user: null });
+
+      return res.status(200).json({ message: 'Authenticated', user: findUser });
+    }
   } catch (e) {
+    console.error(e);
     return res
       .status(400)
       .json({ message: 'Something went wrong, please try again' });
