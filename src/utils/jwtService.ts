@@ -1,4 +1,4 @@
-import { Admin } from '@/pages/types/Admin';
+import { Admin } from '@/types/Admin';
 import jwt from 'jsonwebtoken';
 
 type JwtGenerator = {
