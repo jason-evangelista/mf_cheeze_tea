@@ -1,6 +1,6 @@
 import Button from '@/components/common/Button';
-import Input from '@/components/Input';
-import SeoContainer from '@/components/SeoContainer';
+import Input from '@/components/common/Input';
+import SeoContainer from '@/components/common/SeoContainer';
 import { GenerateAccountSchema, generateAccountSchema } from '@/schema/schema';
 import { useCreateUserMutation } from '@/services/userService';
 import { yupResolver } from '@hookform/resolvers/yup';
