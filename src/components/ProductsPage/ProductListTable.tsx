@@ -142,7 +142,7 @@ const ProductListTable = ({ handleGetProductInfo }: ProductListTableProps) => {
         data={data?.data?.products}
       />
       <Pagination
-        isLoading={isLoading}
+        isLoading={isLoading || isFetching}
         returnCurrentSize={data?.data?.currentReturnSize ?? 0}
         refetch={refetch}
         handleBack={handlePreviousPage}
