@@ -1,11 +1,10 @@
-import Navbar from '../Navbar/Navbar';
-import Container from '../common/Container';
+import MainSaleGraph from '../common/Graphs/MainSaleGraph';
 
 const DashboardPage = () => {
   return (
-    <Container>
-      <Navbar />
-    </Container>
+    <div className='w-full'>
+      <MainSaleGraph />
+    </div>
   );
 };
 

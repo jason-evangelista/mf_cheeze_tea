@@ -1,0 +1,258 @@
+[
+  {
+    "id": "clj4h62kf0002637j5nj6qkl7",
+    "name": "Green Tea Cheeze",
+    "large_size_amount": 100,
+    "regular_size_amount": 80,
+    "fixed_amount": 0,
+    "type": "CHEEZE_TEA"
+  },
+  {
+    "id": "clj4h9i1c0004637jfv5ovb7t",
+    "name": "Cocoa Cheeze",
+    "large_size_amount": 95,
+    "regular_size_amount": 85,
+    "fixed_amount": 0,
+    "type": "CHEEZE_TEA"
+  },
+  {
+    "id": "clj4hdy9u0006637j8ws4vrdf",
+    "name": "Matcha Cheeze",
+    "large_size_amount": 95,
+    "regular_size_amount": 85,
+    "fixed_amount": 0,
+    "type": "CHEEZE_TEA"
+  },
+  {
+    "id": "clj4hilmm00006341fewuhdm4",
+    "name": "Taro Cheeze Tea",
+    "large_size_amount": 95,
+    "regular_size_amount": 85,
+    "fixed_amount": 0,
+    "type": "CHEEZE_TEA"
+  },
+  {
+    "id": "clj4hjkq400026341x6akanlb",
+    "name": "House Blend Milk Tea",
+    "large_size_amount": 80,
+    "regular_size_amount": 70,
+    "fixed_amount": 0,
+    "type": "MILK_TEA"
+  },
+  {
+    "id": "clj4hkeb300046341lcvnyday",
+    "name": "Okiniwa Milk Tea",
+    "large_size_amount": 85,
+    "regular_size_amount": 75,
+    "fixed_amount": 0,
+    "type": "MILK_TEA"
+  },
+  {
+    "id": "clj4hl3a800066341ecub7nom",
+    "name": "Green Tea",
+    "large_size_amount": 75,
+    "regular_size_amount": 60,
+    "fixed_amount": 0,
+    "type": "GREEN_TEA_AND_LEMONADE"
+  },
+  {
+    "id": "clj4hlsxl00086341indql9no",
+    "name": "Lemonade Yakult",
+    "large_size_amount": 85,
+    "regular_size_amount": 75,
+    "fixed_amount": 0,
+    "type": "GREEN_TEA_AND_LEMONADE"
+  },
+  {
+    "id": "clj4hp49b000a634110o51m8v",
+    "name": "Winter Melon Serradura",
+    "large_size_amount": 0,
+    "regular_size_amount": 0,
+    "fixed_amount": 100,
+    "type": "SERRADURA"
+  },
+  {
+    "id": "clj4hpqr6000c63417groixwa",
+    "name": "Mango Serradura",
+    "large_size_amount": 0,
+    "regular_size_amount": 0,
+    "fixed_amount": 129,
+    "type": "SERRADURA"
+  },
+  {
+    "id": "clj5dtbcj0000633sqndqr8vl",
+    "name": "Almond Milk Tea",
+    "large_size_amount": 90,
+    "regular_size_amount": 80,
+    "fixed_amount": 0,
+    "type": "MILK_TEA",
+    "created_at": "2023-06-21 07:17:24.020",
+    "updated_at": "2023-06-21 07:17:24.020"
+  },
+  {
+    "id": "clj5e2uox0002633smw8czh9s",
+    "name": "Taro Milk Tea",
+    "large_size_amount": 85,
+    "regular_size_amount": 75,
+    "fixed_amount": 0,
+    "type": "MILK_TEA",
+    "created_at": "2023-06-21 07:24:48.993",
+    "updated_at": "2023-06-21 07:24:48.993"
+  },
+  {
+    "id": "clj5g3xin0004633skyi5mkj3",
+    "name": "Hokkaido Serradura",
+    "large_size_amount": 0,
+    "regular_size_amount": 0,
+    "fixed_amount": 100,
+    "type": "SERRADURA",
+    "created_at": "2023-06-21 08:21:38.544",
+    "updated_at": "2023-06-21 08:21:38.544"
+  },
+  {
+    "id": "clj5ghxfc0006633srzsd8m04",
+    "name": "Super Macee Float",
+    "large_size_amount": 100,
+    "regular_size_amount": 90,
+    "fixed_amount": 0,
+    "type": "CHEEZE_TEA"
+  },
+  {
+    "id": "clj5mdu410008633si61gsdyk",
+    "name": "House Blend Milk",
+    "large_size_amount": 80,
+    "regular_size_amount": 70,
+    "fixed_amount": 0,
+    "type": "CHEEZE_TEA"
+  },
+  {
+    "id": "clj5mfjna000a633seod0b9gh",
+    "name": "Almond Cheeze Tea",
+    "large_size_amount": 95,
+    "regular_size_amount": 85,
+    "fixed_amount": 0,
+    "type": "CHEEZE_TEA"
+  },
+  {
+    "id": "clj5mgi8v000c633sgwzbjqyg",
+    "name": "Okiniwa Cheeze Tea",
+    "large_size_amount": 95,
+    "regular_size_amount": 85,
+    "fixed_amount": 0,
+    "type": "CHEEZE_TEA"
+  },
+  {
+    "id": "clj5mhafy000e633sz40v7c4s",
+    "name": "Oreo Milk Tea",
+    "large_size_amount": 95,
+    "regular_size_amount": 85,
+    "fixed_amount": 0,
+    "type": "MILK_TEA"
+  },
+  {
+    "id": "clj5mlunm000g633s91go2083",
+    "name": "2 P'S (Milk Tea w/ Pearl)",
+    "large_size_amount": 90,
+    "regular_size_amount": 80,
+    "fixed_amount": 0,
+    "type": "MILK_TEA"
+  },
+  {
+    "id": "clj5mmk6g000i633stmpvrs1k",
+    "name": "Lemon Yakult Tea",
+    "large_size_amount": 90,
+    "regular_size_amount": 80,
+    "fixed_amount": 0,
+    "type": "GREEN_TEA_AND_LEMONADE"
+  },
+  {
+    "id": "clj5mnqdo000k633s0g789ve0",
+    "name": "Lemonade Calamsi Tea",
+    "large_size_amount": 90,
+    "regular_size_amount": 80,
+    "fixed_amount": 0,
+    "type": "GREEN_TEA_AND_LEMONADE"
+  },
+  {
+    "id": "clj5objk3000m633srqtfjlij",
+    "name": "Serradura",
+    "large_size_amount": 0,
+    "regular_size_amount": 0,
+    "fixed_amount": 95,
+    "type": "SERRADURA"
+  },
+  {
+    "id": "clj5oc6wp000o633sont9f35o",
+    "name": "Matcha Serradura",
+    "large_size_amount": 0,
+    "regular_size_amount": 0,
+    "fixed_amount": 105,
+    "type": "SERRADURA"
+  },
+  {
+    "id": "clj5odwjo000q633s1g4lty1e",
+    "name": "Honey Lemon Dew",
+    "large_size_amount": 90,
+    "regular_size_amount": 80,
+    "fixed_amount": 0,
+    "type": "CHEEZE_TEA",
+    "created_at": "2023-06-21 12:13:20.773",
+    "updated_at": "2023-06-21 12:13:20.773"
+  },
+  {
+    "id": "clj5oe9rw000s633sxnwx5awe",
+    "name": "Tes 1",
+    "large_size_amount": 100,
+    "regular_size_amount": 50,
+    "fixed_amount": 0,
+    "type": "CHEEZE_TEA"
+  },
+  {
+    "id": "clj5oemdx000u633snagir7pf",
+    "name": "Test 1",
+    "large_size_amount": 100,
+    "regular_size_amount": 50,
+    "fixed_amount": 0,
+    "type": "MILK_TEA"
+  },
+  {
+    "id": "clj5oeu9u000w633so7ij0y8o",
+    "name": "Tes 3",
+    "large_size_amount": 100,
+    "regular_size_amount": 50,
+    "fixed_amount": 0,
+    "type": "CHEEZE_TEA"
+  },
+  {
+    "id": "clj5of0ws000y633saj4p8zwh",
+    "name": "tes 4",
+    "large_size_amount": 100,
+    "regular_size_amount": 50,
+    "fixed_amount": 0,
+    "type": "CHEEZE_TEA"
+  },
+  {
+    "id": "clj5of6rc0010633s0pxd20c8",
+    "name": "Test 5",
+    "large_size_amount": 100,
+    "regular_size_amount": 50,
+    "fixed_amount": 0,
+    "type": "CHEEZE_TEA"
+  },
+  {
+    "id": "clj5ofgct0012633sv5h12thp",
+    "name": "asd",
+    "large_size_amount": 2,
+    "regular_size_amount": 1,
+    "fixed_amount": 0,
+    "type": "CHEEZE_TEA"
+  },
+  {
+    "id": "clj5ofkzf0014633sx03vtj8p",
+    "name": "asfdfsg",
+    "large_size_amount": 45,
+    "regular_size_amount": 3,
+    "fixed_amount": 0,
+    "type": "CHEEZE_TEA"
+  }
+]

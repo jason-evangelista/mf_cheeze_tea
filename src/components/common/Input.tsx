@@ -15,16 +15,17 @@ type InputProps = DetailedHTMLProps<
 };
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ labelTitle, errorMessage, ...rest }, ref) => {
+  ({ labelTitle, errorMessage, className, ...rest }, ref) => {
     const inputClassName = clsx([
       'border p-2 rounded-sm focus:outline-gray-600',
       {
         'border-red-500 focus:outline-red-500': errorMessage,
       },
+      className,
     ]);
     return (
       <div className="my-2">
-        <label className="font-semibold text-sm block">{labelTitle}</label>
+        <label className="font-medium text-sm block">{labelTitle}</label>
         <input ref={ref} className={inputClassName} {...rest} />
         {errorMessage && (
           <span

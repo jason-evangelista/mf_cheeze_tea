@@ -1,6 +1,11 @@
 {
   "extends": ["eslint:recommended", "next/core-web-vitals"],
   "globals": {
-    "globalThis": "readonly"
+    "globalThis": "readonly",
+    "this": "readonly",
+    "VoidFunction": "readonly"
+  },
+  "rules": {
+    "react-hooks/exhaustive-deps": "off"
   }
 }

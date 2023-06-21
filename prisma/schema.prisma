@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -20,4 +21,29 @@ model Account {
   updated_at DateTime @updatedAt
 
   @@map("accounts")
+}
+
+model Product {
+  id                  String      @id @default(cuid())
+  name                String      @unique
+  large_size_amount   Int?
+  regular_size_amount Int?
+  fixed_amount        Int?
+  type                ProductType
+  created_at          DateTime    @default(now())
+  updated_at          DateTime    @updatedAt
+
+  @@map("products")
+}
+
+enum ProductType {
+  CHEEZE_TEA
+  MILK_TEA
+  SERRADURA
+  GREEN_TEA_AND_LEMONADE
+}
+
+enum ProductSize {
+  REGULAR
+  LARGE
 }
