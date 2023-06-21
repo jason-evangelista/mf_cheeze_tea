@@ -40,35 +40,40 @@ function Pagination({
   ]);
 
   return (
-    <div className={paginationClassname}>
-      <div className="flex items-center gap-2 my-2">
-        {overAllSize > 10 && (
-          <>
-            <Button
-              onClick={handleBack}
-              btnTitle={<IconChevronLeft size={20} />}
-              className="bg-blue-500 p-[3px]"
-            />
-            {hasNextPage && (
-              <Button
-                onClick={handleNext}
-                btnTitle={<IconChevronRight size={20} />}
-                className="bg-blue-500 p-[3px]"
-              />
+    <>
+      {isLoading && (
+        <div className={paginationClassname}>
+          <div className="flex items-center gap-2 my-2">
+            {overAllSize > 10 && (
+              <>
+                <Button
+                  onClick={handleBack}
+                  btnTitle={<IconChevronLeft size={20} />}
+                  className="bg-blue-500 p-[3px]"
+                />
+                {hasNextPage && (
+                  <Button
+                    onClick={handleNext}
+                    btnTitle={<IconChevronRight size={20} />}
+                    className="bg-blue-500 p-[3px]"
+                  />
+                )}
+              </>
             )}
-          </>
-        )}
-      </div>
-      {isLoading || !overAllSize ? null : (
-        <div>
-          <p className="text-sm font-semibold">
-            Showing&nbsp;{returnCurrentSize}
-            &nbsp;of&nbsp;10&nbsp;in&nbsp;Page&nbsp;{currentPage}&nbsp;of&nbsp;
-            {calculatePossiblePage}&nbsp;Total of&nbsp;{overAllSize}
-          </p>
+          </div>
+          {!overAllSize ? null : (
+            <div>
+              <p className="text-sm font-semibold">
+                Showing&nbsp;{returnCurrentSize}
+                &nbsp;of&nbsp;10&nbsp;in&nbsp;Page&nbsp;{currentPage}
+                &nbsp;of&nbsp;
+                {calculatePossiblePage}&nbsp;Total of&nbsp;{overAllSize}
+              </p>
+            </div>
+          )}
         </div>
       )}
-    </div>
+    </>
   );
 }
 
