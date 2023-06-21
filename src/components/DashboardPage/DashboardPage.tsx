@@ -1,9 +1,9 @@
-import MainSaleGraph from '../common/Graphs/MainSaleGraph';
+import { LazyMainSaleGraph } from '../common/Graphs';
 
 const DashboardPage = () => {
   return (
-    <div className='w-full'>
-      <MainSaleGraph />
+    <div className="w-full">
+      <LazyMainSaleGraph />
     </div>
   );
 };

@@ -12,15 +12,17 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
     ]);
 
     return (
-      isOpen && (
-        <div
-          ref={ref}
-          className={menuClassName}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {children}
-        </div>
-      )
+      <>
+        {isOpen && (
+          <div
+            ref={ref}
+            className={menuClassName}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {children}
+          </div>
+        )}
+      </>
     );
   }
 );

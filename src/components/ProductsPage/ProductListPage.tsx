@@ -14,6 +14,17 @@ const ProductListPage = () => {
     setProductInfo(payload);
   };
 
+  const removeProductInfoOnClose = () => {
+    setProductInfo({
+      id: '',
+      product_name: '',
+      product_type: 'CHEEZE_TEA',
+      fixed_amount: undefined,
+      large_size_amount: undefined,
+      regular_size_amount: undefined,
+    });
+  };
+
   const memoProductInfo = useMemo(() => productInfo, [productInfo]);
 
   useEffect(() => {
@@ -28,6 +39,7 @@ const ProductListPage = () => {
         isOpen={isOpen}
         handleClose={handleClose}
         initialValue={memoProductInfo}
+        removeProdInfoOnClose={removeProductInfoOnClose}
       />
       <div className="w-full flex justify-end my-2">
         <Button

@@ -56,6 +56,8 @@ const DeleteModal = ({
     }
   }, [isSuccess, isError]);
 
+  if (!isOpen) return null;
+
   return (
     <Modal handleToggle={handleToggle} isOpen={isOpen} title="Delete Product">
       <div>{message}</div>

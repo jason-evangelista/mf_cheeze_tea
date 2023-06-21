@@ -19,12 +19,14 @@ export type ProductFormProps = {
   handleToggle: () => void;
   handleClose: () => void;
   initialValue?: ProductSchema & { id: string };
+  removeProdInfoOnClose: VoidFunction;
 };
 const ProductForm = ({
   isOpen,
   handleToggle,
   handleClose,
   initialValue,
+  removeProdInfoOnClose,
 }: ProductFormProps) => {
   const {
     register,
@@ -35,7 +37,8 @@ const ProductForm = ({
     watch,
     reset,
     formState: { errors },
-  } = useForm<Required<ProductSchema>>({
+  } = useForm<ProductSchema>({
+    //@ts-ignore
     resolver: yupResolver(productSchema),
     values: initialValue as Required<ProductSchema>,
   });
@@ -58,7 +61,7 @@ const ProductForm = ({
     }
 
     // Update product
-    if (initialValue) {
+    if (initialValue?.id) {
       updateProduct({ ...payload, id: initialValue?.id });
       return;
     }
@@ -66,6 +69,12 @@ const ProductForm = ({
     // Proceed add product
     addProduct(payload);
   };
+
+  useEffect(() => {
+    return () => {
+      reset();
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (watchProductType !== 'SERRADURA') {
@@ -104,7 +113,14 @@ const ProductForm = ({
   }, [updateProductState]);
 
   return (
-    <Modal title="Products" isOpen={isOpen} handleToggle={handleToggle}>
+    <Modal
+      title="Products"
+      isOpen={isOpen}
+      handleToggle={() => {
+        handleToggle;
+        removeProdInfoOnClose();
+      }}
+    >
       <form onSubmit={handleSubmit(handleMutateProduct)}>
         <Input
           placeholder="Product Name"
