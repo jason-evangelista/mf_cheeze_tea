@@ -10,7 +10,7 @@ const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_SERVICE_API,
   prepareHeaders: (headers) => {
     const token = Cookies.get('mfcheezetea_session');
-    if (token) headers.set('Authorization', `Bearer ${token}`);
+    if (token) headers.set('Authorization', token);
     return headers;
   },
 });
@@ -31,7 +31,7 @@ const baseQueryInterceptor: BaseQueryFn<
   return result;
 };
 
-const tagTypes: string[] = ['User'];
+const tagTypes: string[] = ['User', 'Product'];
 
 const baseApi = createApi({
   reducerPath: 'crmApi',

@@ -1,18 +1,35 @@
 import baseApi from '@/clients/baseApi';
+import DashboardLayout from '@/components/common/DashboardLayout';
 import AuthProvider from '@/providers/AuthProvider';
 import '@/styles/globals.css';
 import { ApiProvider } from '@reduxjs/toolkit/dist/query/react';
 import type { AppProps } from 'next/app';
+import { useRouter } from 'next/router';
+import 'react-dropdown/style.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function App({ Component, pageProps }: AppProps) {
+  const router = useRouter();
+
+  const shoudInDashboardLayout =
+    router.pathname.includes('/dashboard') ||
+    router.pathname.includes('/products') ||
+    router.pathname.includes('/orders') ||
+    router.pathname.includes('/sales-report');
+
   return (
     <ApiProvider api={baseApi}>
-      <AuthProvider>
-        <ToastContainer theme="colored" hideProgressBar />
+      <ToastContainer theme="colored" hideProgressBar />
+      {shoudInDashboardLayout ? (
+        <AuthProvider>
+          <DashboardLayout>
+            <Component {...pageProps} />
+          </DashboardLayout>
+        </AuthProvider>
+      ) : (
         <Component {...pageProps} />
-      </AuthProvider>
+      )}
     </ApiProvider>
   );
 }

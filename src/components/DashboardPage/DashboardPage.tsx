@@ -1,11 +1,10 @@
-import Navbar from '../Navbar/Navbar';
-import Container from '../common/Container';
+import { LazyMainSaleGraph } from '../common/Graphs';
 
 const DashboardPage = () => {
   return (
-    <Container>
-      <Navbar />
-    </Container>
+    <div className="w-full">
+      <LazyMainSaleGraph />
+    </div>
   );
 };
 
