@@ -42,6 +42,7 @@ const OrderForm = ({ handleToggle, isOpen, handleClose }: OrderFormProps) => {
     formState: { errors },
     reset,
   } = useForm<Required<OrderSchema>>({
+    // @ts-ignore
     resolver: yupResolver(orderSchema),
   });
 
