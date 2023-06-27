@@ -35,6 +35,7 @@ const ProductListTable = ({ handleGetProductInfo }: ProductListTableProps) => {
     useGetAllProductQuery({
       currentPage,
       skip: numberTokip,
+      showAll: false,
     });
 
   const { isOpen, handleToggle, handleClose } = useToggleContainer();

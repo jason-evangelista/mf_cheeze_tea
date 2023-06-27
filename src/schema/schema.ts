@@ -85,6 +85,20 @@ export const productSchema = yup.object().shape({
     }),
 });
 
+export const orderSchema = yup.object().shape({
+  product_id: yup.string(),
+  product_base_price: yup
+    .number()
+    .transform((value) => (isNaN(value) ? 0 : value)),
+  product_quantity: yup.number().min(1, 'Required minimum order of 1'),
+  product_order_type: yup.string(),
+  product_subtotal: yup
+    .number()
+    .transform((value) => (isNaN(value) ? 0 : value)),
+  product_order_date: yup.date().default(() => new Date()),
+});
+
 export type GenerateAccountSchema = yup.InferType<typeof generateAccountSchema>;
 export type SignInSchema = yup.InferType<typeof signInSchema>;
 export type ProductSchema = yup.InferType<typeof productSchema>;
+export type OrderSchema = yup.InferType<typeof orderSchema>;

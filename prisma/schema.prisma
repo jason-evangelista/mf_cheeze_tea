@@ -17,6 +17,7 @@ model Account {
   email      String?  @unique @db.VarChar(255)
   password   String   @db.LongText
   token      String?  @db.LongText
+  status     Status   @default(ACTIVE)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
@@ -25,15 +26,34 @@ model Account {
 
 model Product {
   id                  String      @id @default(cuid())
-  name                String      @unique
+  name                String
   large_size_amount   Int?
   regular_size_amount Int?
   fixed_amount        Int?
   type                ProductType
+  status              Status      @default(ACTIVE)
   created_at          DateTime    @default(now())
   updated_at          DateTime    @updatedAt
+  Order               Order[]
 
+  @@fulltext([name])
   @@map("products")
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  product_id      String
+  quantity_sale   Int
+  order_type_size String
+  base_amount     Int
+  sub_total       Int
+  order_date      DateTime @db.Date
+  status          Status   @default(ACTIVE)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  product         Product  @relation(fields: [product_id], references: [id])
+
+  @@map("orders")
 }
 
 enum ProductType {
@@ -46,4 +66,9 @@ enum ProductType {
 enum ProductSize {
   REGULAR
   LARGE
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
 }

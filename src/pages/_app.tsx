@@ -5,6 +5,7 @@ import '@/styles/globals.css';
 import { ApiProvider } from '@reduxjs/toolkit/dist/query/react';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
+import 'react-day-picker/dist/style.css';
 import 'react-dropdown/style.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';

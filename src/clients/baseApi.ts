@@ -31,7 +31,7 @@ const baseQueryInterceptor: BaseQueryFn<
   return result;
 };
 
-const tagTypes: string[] = ['User', 'Product'];
+const tagTypes: string[] = ['User', 'Product', 'Order'];
 
 const baseApi = createApi({
   reducerPath: 'crmApi',
