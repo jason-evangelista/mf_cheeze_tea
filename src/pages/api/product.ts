@@ -10,9 +10,12 @@ const productApi = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
       const body = req.body as ProductSchema;
 
-      const findProduct = await prismaClient.product.findUnique({
+      const findProduct = await prismaClient.product.findFirst({
         where: {
           name: body?.product_name,
+          AND: {
+            status: 'ACTIVE',
+          },
         },
       });
 
@@ -35,37 +38,86 @@ const productApi = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Get All Product
     if (req.method === 'GET') {
-      const body = req.query as TableProps;
+      const query = req.query as TableProps;
+      if (query.showAll === 'false' && !req.query.id) {
+        const getProductSize = await prismaClient.product.count({
+          where: { status: 'ACTIVE' },
+        });
+        const getAllProduct = await prismaClient.product.findMany({
+          where: {
+            status: 'ACTIVE',
+          },
+          orderBy: {
+            created_at: 'desc',
+          },
+          ...(+query.currentPage > 1 && {
+            skip: +query.skip * (+query.currentPage - 1),
+          }),
+          take: 10,
+        });
 
-      const getProductSize = await prismaClient.product.count();
-      const getAllProduct = await prismaClient.product.findMany({
-        orderBy: {
-          created_at: 'desc',
-        },
-        ...(+body.currentPage > 1 && {
-          skip: +body.skip * (+body.currentPage - 1),
-        }),
-        take: 10,
-      });
+        return res.status(200).json({
+          message: 'Successfully fetched all product',
+          data: {
+            products: getAllProduct,
+            size: getProductSize,
+            currentPage: +query.currentPage,
+            currentReturnSize: getAllProduct.length,
+          },
+        });
+      }
+      if (query.showAll === 'true' && !req.query.id) {
+        const getAllProduct = await prismaClient.product.findMany({
+          where: {
+            AND: {
+              status: 'ACTIVE',
+            },
+          },
+          ...(query.searchKey !== 'undefined' && {
+            where: {
+              name: {
+                search: query.searchKey.replace(/[^a-zA-Z ]/g, '').concat(' *'),
+              },
+              AND: {
+                status: 'ACTIVE',
+              },
+            },
+          }),
+        });
+        return res.status(200).json({
+          message: 'Successfuly fetched product',
+          data: { products: getAllProduct },
+        });
+      }
 
-      return res.status(200).json({
-        message: 'Successfully fetched all product',
-        data: {
-          products: getAllProduct,
-          size: getProductSize,
-          currentPage: +body.currentPage,
-          currentReturnSize: getAllProduct.length,
-        },
-      });
+      // Get one Product
+      if ('id' in req.query) {
+        const findOneProduct = await prismaClient.product.findFirst({
+          where: {
+            id: req.query.id as string,
+            AND: {
+              status: 'ACTIVE',
+            },
+          },
+        });
+
+        return res.status(200).json({
+          message: 'Fetched one product',
+          data: { product: findOneProduct },
+        });
+      }
     }
 
     // Update Product
     if (req.method === 'PUT') {
       const body = req.body as ProductSchema & { id: string };
 
-      const findProduct = await prismaClient.product.findUnique({
+      const findProduct = await prismaClient.product.findFirst({
         where: {
           name: body?.product_name,
+          AND: {
+            status: 'ACTIVE',
+          },
         },
       });
 
@@ -101,7 +153,10 @@ const productApi = async (req: NextApiRequest, res: NextApiResponse) => {
       if (!findProduct)
         return res.status(400).json({ message: "Product doesn't exist" });
 
-      const deleteProduct = await prismaClient.product.delete({
+      const deleteProduct = await prismaClient.product.update({
+        data: {
+          status: 'INACTIVE',
+        },
         where: {
           id: query.id,
         },

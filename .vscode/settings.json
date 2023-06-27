@@ -2,6 +2,12 @@
   "tailwindCSS.experimental.classRegex": [
     ["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
   ],
+  "tailwindCSS.classAttributes": [
+    "class",
+    "className",
+    "ngClass",
+    "mainContainerClassName"
+  ],
   "sqltools.connections": [
     {
       "mysqlOptions": {
