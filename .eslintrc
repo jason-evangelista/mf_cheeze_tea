@@ -3,7 +3,8 @@
   "globals": {
     "globalThis": "readonly",
     "this": "readonly",
-    "VoidFunction": "readonly"
+    "VoidFunction": "readonly",
+    "Option": "readonly"
   },
   "rules": {
     "react-hooks/exhaustive-deps": "off"

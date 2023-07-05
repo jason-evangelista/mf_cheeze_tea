@@ -56,6 +56,29 @@ model Order {
   @@map("orders")
 }
 
+model SalesTarget {
+  id         String          @id @default(cuid())
+  month      String?
+  year       Int?
+  target     Int
+  type       SalesTargetType
+  created_at DateTime        @default(now())
+  updated_at DateTime        @updatedAt
+
+  @@unique([month, year])
+  @@map("sales_targets")
+}
+
+model GraphDomain {
+  id         String          @id @default(cuid())
+  max_domain Int
+  type       SalesTargetType
+  created_at DateTime        @default(now())
+  updated_at DateTime        @updatedAt
+
+  @@map("graph_domains")
+}
+
 enum ProductType {
   CHEEZE_TEA
   MILK_TEA
@@ -71,4 +94,9 @@ enum ProductSize {
 enum Status {
   ACTIVE
   INACTIVE
+}
+
+enum SalesTargetType {
+  MONTH
+  YEAR
 }
