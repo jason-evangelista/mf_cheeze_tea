@@ -1,5 +1,6 @@
-import { useGetAllOrderQuery } from '@/services/orderService';
-import { useEffect } from 'react';
+import { DashboardContext } from '@/components/DashboardPage/DashboardContext';
+import { SalesMonth, SalesYear } from '@/types/Sales';
+import { memo, useContext, useMemo } from 'react';
 import {
   CartesianGrid,
   LabelList,
@@ -11,80 +12,37 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-const data: { name: string; sales: number; label: string }[] = [
-  {
-    name: 'Monday',
-    sales: 26,
-    label: '26%',
-  },
-  {
-    name: 'Tuesday',
-    sales: 12,
-    label: '12%',
-  },
-  {
-    name: 'Wednesday',
-    sales: 24,
-    label: '24%',
-  },
-  {
-    name: 'Thursday',
-    sales: 29,
-    label: '29%',
-  },
-  {
-    name: 'Friday',
-    sales: 20,
-    label: '20%',
-  },
-  {
-    name: 'Saturday',
-    sales: 45,
-    label: '45%',
-  },
-];
 
-const MainSaleGraph = () => {
-  const { data: orderData } = useGetAllOrderQuery({
-    currentPage: 1,
-    searchKey: '',
-    showAll: true,
-    skip: 0,
-  });
+export type MainSaleGraphProps = {
+  data?: SalesMonth | SalesYear;
+};
 
-  useEffect(() => {
-    if (!orderData?.data?.orders.length) return;
-    console.log({ orderData: orderData?.data?.orders });
+const domain = {
+  month: [0, 20000],
+  year: [0, 100000],
+  tickMonth: 10,
+  tickYear: 20,
+};
 
-    const overallBasePrice = orderData?.data?.orders?.reduce(
-      (prev, { base_amount }) => prev + base_amount,
-      0
-    );
+const MainSaleGraph = ({ data }: MainSaleGraphProps) => {
+  const { salesType } = useContext(DashboardContext);
+  const memoData = useMemo(() => {
+    if (!data) return [];
+    return Object.entries(data).flatMap((item) => ({
+      ...item[1],
+      name: item[1].label,
+    }));
+  }, [data, salesType]);
 
-    const overAllSubTotal = orderData?.data?.orders?.reduce(
-      (prev, { sub_total }) => prev + sub_total,
-      0
-    );
-
-    const overAllQuantity = orderData?.data?.orders?.reduce(
-      (prev, { quantity_sale }) => prev + quantity_sale,
-      0
-    );
-
-    const checkResult = Math.ceil((overAllSubTotal / 7000) * 100);
-
-    console.log({
-      overallBasePrice,
-      overAllSubTotal,
-      overAllQuantity,
-      checkResult,
-    });
-  }, [orderData]);
+  console.log({ memoData });
 
   const setLineLabel = ({ x, y, stroke, value }: any) => {
     return (
-      <text x={x} y={y} dy={-4} fill={stroke} fontSize={10} textAnchor="middle">
-        {value}%
+      <text x={x} y={y} dy={-4} fill={stroke} fontSize={11} textAnchor="middle">
+        {new Intl.NumberFormat('fil-PH', {
+          style: 'currency',
+          currency: 'PHP',
+        }).format(value)}
       </text>
     );
   };
@@ -92,9 +50,7 @@ const MainSaleGraph = () => {
   return (
     <ResponsiveContainer width="100%" height={400} className="text-xs">
       <LineChart
-        width={500}
-        height={300}
-        data={data}
+        data={memoData}
         margin={{
           top: 5,
           right: 30,
@@ -103,19 +59,32 @@ const MainSaleGraph = () => {
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" label={<span></span>} />
+        <XAxis dataKey="name" />
         <YAxis
-          accumulate="none"
-          dataKey="sales"
-          domain={[0, 100]}
-          tickCount={11}
+          dataKey="actual_sales"
+          domain={salesType === 'Month' ? domain.month : domain.year}
+          tickCount={salesType === 'Month' ? domain.tickMonth : domain.tickYear}
         />
         <Tooltip />
-        <Legend />
+        <Legend
+          margin={{ bottom: 10 }}
+          iconSize={20}
+          iconType="rect"
+          fontSize={24}
+        />
+        <Line
+          animationBegin={0}
+          type="monotone"
+          dataKey="actual_sales"
+          stroke="#03c859"
+          activeDot={{ r: 6 }}
+        >
+          <LabelList content={(v) => setLineLabel(v)} />
+        </Line>
         <Line
           type="monotone"
-          dataKey="sales"
-          stroke="#03c859"
+          dataKey="sales_target"
+          stroke="#ff0000"
           activeDot={{ r: 6 }}
         >
           <LabelList content={(v) => setLineLabel(v)} />
@@ -125,4 +94,4 @@ const MainSaleGraph = () => {
   );
 };
 
-export default MainSaleGraph;
+export default memo(MainSaleGraph);

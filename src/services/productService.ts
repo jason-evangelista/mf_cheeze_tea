@@ -1,6 +1,8 @@
 import baseApi from '@/clients/baseApi';
 import { ProductSchema } from '@/schema/schema';
 import { BaseSuccessResponse } from '@/types/BaseApiResponse';
+import { CategoryPerformance } from '@/types/CategoryPerformance';
+import { ProductPerformance } from '@/types/ProductPerformance';
 import { Product } from '@prisma/client';
 
 const productApiService = baseApi.injectEndpoints({
@@ -35,6 +37,20 @@ const productApiService = baseApi.injectEndpoints({
       }),
       providesTags: ['Product'],
       keepUnusedDataFor: 1,
+    }),
+    getAllProductPerformance: builder.query<
+      BaseSuccessResponse<{ productPerformance: ProductPerformance[] }>,
+      void
+    >({
+      query: () => `/sales/product-performance`,
+      providesTags: ['Product Performance'],
+    }),
+    getAllCategoryPerformance: builder.query<
+      BaseSuccessResponse<{ categoryPerformance: CategoryPerformance[] }>,
+      void
+    >({
+      query: () => `/sales/category-performance`,
+      providesTags: ['Category Performance'],
     }),
     createProduct: builder.mutation<BaseSuccessResponse, ProductSchema>({
       query: (body) => ({
@@ -71,4 +87,6 @@ export const {
   useUpdateProductMutation,
   useDeleteProductMutation,
   useGetProductQuery,
+  useGetAllProductPerformanceQuery,
+  useGetAllCategoryPerformanceQuery,
 } = productApiService;
