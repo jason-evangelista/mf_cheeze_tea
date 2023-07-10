@@ -1,7 +1,10 @@
 import baseApi from '@/clients/baseApi';
 import DashboardLayout from '@/components/common/DashboardLayout';
+import { RouterTransition } from '@/components/common/RouteTransition';
 import AuthProvider from '@/providers/AuthProvider';
-import '@/styles/globals.css';
+import '@/styles/globals.scss';
+import { MantineProvider } from '@mantine/core';
+import { ModalsProvider } from '@mantine/modals';
 import { ApiProvider } from '@reduxjs/toolkit/dist/query/react';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
@@ -20,17 +23,29 @@ export default function App({ Component, pageProps }: AppProps) {
     router.pathname.includes('/sales-report');
 
   return (
-    <ApiProvider api={baseApi}>
-      <ToastContainer theme="colored" hideProgressBar />
-      {shoudInDashboardLayout ? (
-        <AuthProvider>
-          <DashboardLayout>
+    <MantineProvider
+      withGlobalStyles
+      withNormalizeCSS
+      theme={{
+        colorScheme: 'light',
+        fontFamily: 'Poppins',
+      }}
+    >
+      <ModalsProvider>
+        <RouterTransition />
+        <ApiProvider api={baseApi}>
+          <ToastContainer theme="colored" hideProgressBar />
+          {shoudInDashboardLayout ? (
+            <AuthProvider>
+              <DashboardLayout>
+                <Component {...pageProps} />
+              </DashboardLayout>
+            </AuthProvider>
+          ) : (
             <Component {...pageProps} />
-          </DashboardLayout>
-        </AuthProvider>
-      ) : (
-        <Component {...pageProps} />
-      )}
-    </ApiProvider>
+          )}
+        </ApiProvider>
+      </ModalsProvider>
+    </MantineProvider>
   );
 }

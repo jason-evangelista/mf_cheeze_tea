@@ -1,7 +1,8 @@
 import useToggleContainer from '@/hooks/useToggleContainer';
 import { ProductSchema } from '@/schema/schema';
+import { Button, Paper } from '@mantine/core';
+import { IconPlus } from '@tabler/icons-react';
 import { useEffect, useMemo, useState } from 'react';
-import Button from '../common/Button';
 import ProductForm from './ProductForm';
 import ProductListTable from './ProductListTable';
 
@@ -33,7 +34,7 @@ const ProductListPage = () => {
   }, [productInfo]);
 
   return (
-    <div>
+    <Paper radius="md" className="p-4">
       <ProductForm
         handleToggle={handleToggle}
         isOpen={isOpen}
@@ -43,13 +44,16 @@ const ProductListPage = () => {
       />
       <div className="w-full flex justify-end my-2">
         <Button
-          btnTitle="Add Product"
           onClick={handleToggle}
-          className="bg-green-600 text-xs"
-        />
+          color="green"
+          leftIcon={<IconPlus />}
+          size="sm"
+        >
+          Add Product
+        </Button>
       </div>
       <ProductListTable handleGetProductInfo={handleGetProductInfo} />
-    </div>
+    </Paper>
   );
 };
 

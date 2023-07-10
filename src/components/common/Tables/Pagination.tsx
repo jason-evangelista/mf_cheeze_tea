@@ -1,7 +1,7 @@
+import { Button } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
-import Button from '../Button';
 
 type PaginationProps = {
   currentPage: number;
@@ -46,17 +46,13 @@ function Pagination({
           <div className="flex items-center gap-2 my-2">
             {overAllSize > 10 && (
               <>
-                <Button
-                  onClick={handleBack}
-                  btnTitle={<IconChevronLeft size={20} />}
-                  className="bg-blue-500 p-[3px]"
-                />
+                <Button onClick={handleBack} compact>
+                  <IconChevronLeft size={20} />
+                </Button>
                 {hasNextPage && (
-                  <Button
-                    onClick={handleNext}
-                    btnTitle={<IconChevronRight size={20} />}
-                    className="bg-blue-500 p-[3px]"
-                  />
+                  <Button onClick={handleNext} compact>
+                    <IconChevronRight size={20} />
+                  </Button>
                 )}
               </>
             )}

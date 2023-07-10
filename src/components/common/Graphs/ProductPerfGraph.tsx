@@ -1,4 +1,5 @@
 import { ProductPerformance } from '@/types/ProductPerformance';
+import { useMantineTheme } from '@mantine/core';
 import { memo, useMemo } from 'react';
 import {
   Bar,
@@ -17,16 +18,25 @@ type ProductPerfProps = {
 };
 
 const ProductPerfGraph = ({ data }: ProductPerfProps) => {
+  const { colors } = useMantineTheme();
   const memoData = useMemo(() => {
     if (!data.length) return [];
     return data;
   }, [data]);
 
-  const setLabel = ({ x, y, stroke, value, width }: any) => {
+  const setLabel = ({ x, y, value, width }: any) => {
     const fireOffset = value.toString().length < 5;
     const offset = fireOffset ? -0 : 5;
     return (
-      <text x={x + width - offset} y={y} dy={-4} fill={stroke} fontSize={11}>
+      <text
+        x={x + width - offset}
+        y={y}
+        dy={30}
+        fill={colors.blue[9]}
+        fontSize={11}
+        dx={5}
+        fontWeight={800}
+      >
         {new Intl.NumberFormat('fil-PH', {
           style: 'currency',
           currency: 'PHP',
@@ -38,12 +48,11 @@ const ProductPerfGraph = ({ data }: ProductPerfProps) => {
 
   return (
     <div className="pb-8">
-      <h3 className="font-semibold text-center">Product Performance</h3>
       <div>
         <ResponsiveContainer
           width="100%"
-          height={100 * memoData?.length}
-          className="text-xs mt-4 max-h-[700px] overflow-hidden overflow-y-auto"
+          height={80 * memoData?.length}
+          className="text-sm mt-4"
         >
           <BarChart
             layout="vertical"
@@ -63,19 +72,40 @@ const ProductPerfGraph = ({ data }: ProductPerfProps) => {
               domain={[0, maxDomain + 2000]}
               tickCount={10}
             />
-            <YAxis type="category" dataKey="name" />
+            <YAxis type="category" dataKey="name" width={100} />
             <Tooltip />
-            <Legend verticalAlign="top" height={30} />
-            <Bar dataKey="over_all_sale" fill="#E97451" stackId="non_serradura">
-              <LabelList content={(v) => setLabel(v)} position="center" />
-            </Bar>
-            <Bar dataKey="qty_sold" fill="#03c859" stackId="non_serradura" />
+            <Legend
+              verticalAlign="top"
+              height={30}
+              wrapperStyle={{ fontWeight: 600 }}
+            />
+
             <Bar
+              name="Quantity Sold"
+              dataKey="qty_sold"
+              fill={colors.green[8]}
+              stackId="non_serradura"
+            />
+            <Bar
+              name="Regular Size"
               dataKey="regular_size"
               fill="#ff0000"
               stackId="non_serradura"
             />
-            <Bar dataKey="large_size" fill="#0000ff" stackId="non_serradura" />
+            <Bar
+              name="Large Size"
+              dataKey="large_size"
+              fill={colors.orange[8]}
+              stackId="non_serradura"
+            />
+            <Bar
+              name="Over All Sales"
+              dataKey="over_all_sale"
+              fill={colors.blue[8]}
+              stackId="non_serradura"
+            >
+              <LabelList content={(v) => setLabel(v)} position="center" />
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>

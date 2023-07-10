@@ -16,9 +16,9 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="flex items-center justify-between py-4">
+    <nav className="flex-1 flex items-center justify-between px-4 text-white">
       <div aria-label="logo">
-        <h1 className="font-bold">Mf Cheeze Tea</h1>
+        <h1 className="font-bold text-xl">Mf Cheeze Tea</h1>
       </div>
       <div aria-label="user-option-menu" className="flex items-center gap-2">
         <div

@@ -2,10 +2,10 @@ import { PropsWithChildren, createContext, useState } from 'react';
 
 type DashBoardContextProps = {
   // eslint-disable-next-line no-unused-vars
-  handleChangeSalesType: (sales_type: 'Month' | 'Year') => void;
+  handleChangeSalesType: (sales_type: 'Today' | 'Month' | 'Year') => void;
   // eslint-disable-next-line no-unused-vars
   handleSetSaleYear: (year: number) => void;
-  salesType: 'Month' | 'Year';
+  salesType: 'Today' | 'Month' | 'Year';
   salesYear: number;
   yearRange: {
     start_year: number;
@@ -22,7 +22,9 @@ export const DashboardContext = createContext<Partial<DashBoardContextProps>>(
 );
 
 const DashboardContextProvider = ({ children }: PropsWithChildren) => {
-  const [salesType, setSalesType] = useState<'Month' | 'Year'>('Month');
+  const [salesType, setSalesType] = useState<'Today' | 'Month' | 'Year'>(
+    'Month'
+  );
   const [salesYear, setSaleYear] = useState(new Date().getFullYear());
   const [yearRange, setYearRange] = useState<
     DashBoardContextProps['yearRange']
@@ -31,7 +33,7 @@ const DashboardContextProvider = ({ children }: PropsWithChildren) => {
     end_year: new Date().getFullYear() + 5,
   });
 
-  const handleChangeSalesType = (sales: 'Month' | 'Year') => {
+  const handleChangeSalesType = (sales: 'Today' | 'Month' | 'Year') => {
     setSalesType(sales);
   };
 

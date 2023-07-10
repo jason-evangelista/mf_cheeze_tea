@@ -60,7 +60,6 @@ const CategoryPerfGraph = ({ data }: CategoryPerfGraphProps) => {
   }, [data]);
   return (
     <div className="pb-8">
-      <h3 className="font-semibold text-center">Category Performance</h3>
       <ResponsiveContainer width="100%" height={500}>
         <PieChart width={600} height={600}>
           <Pie
@@ -69,7 +68,7 @@ const CategoryPerfGraph = ({ data }: CategoryPerfGraphProps) => {
             cy="50%"
             labelLine={false}
             label={renderCustomizedLabel}
-            outerRadius={200}
+            outerRadius={250}
             fill="#8884d8"
             dataKey="value"
           >

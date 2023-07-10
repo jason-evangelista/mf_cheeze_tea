@@ -1,19 +1,40 @@
+import {
+  AppShell,
+  Header,
+  Navbar as MNavbar,
+  useMantineTheme,
+} from '@mantine/core';
+import clsx from 'clsx';
 import { PropsWithChildren } from 'react';
 import Navbar from '../Navbar/Navbar';
-import Container from './Container';
 import SalesNavigation from './SalesNavigation';
 
 const DashboardLayout = ({ children }: PropsWithChildren) => {
+  const { colors } = useMantineTheme();
+
+  const headerClassName = clsx([
+    'flex flex-col justify-center',
+    {
+      [`bg-[${colors.blue[8]}]`]: !!colors.blue[8],
+    },
+  ]);
   return (
-    <Container>
-      <Navbar />
-      <div className="mt-6 flex items-start gap-4">
-        <div>
+    <AppShell
+      padding="md"
+      navbar={
+        <MNavbar width={{ base: 200 }}>
           <SalesNavigation />
-        </div>
-        <main className="flex-1">{children}</main>
-      </div>
-    </Container>
+        </MNavbar>
+      }
+      header={
+        <Header height={60} className={headerClassName}>
+          <Navbar />
+        </Header>
+      }
+      bg={colors.gray[1]}
+    >
+      <main className="flex-1">{children}</main>
+    </AppShell>
   );
 };
 
