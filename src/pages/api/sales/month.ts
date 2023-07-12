@@ -6,7 +6,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'POST') {
-      const body = req.body as { year: number };
+      const body = req.body as { year: number; productId?: string };
       const date = transformSalesMonth(body.year);
 
       const findSalesTarget = await prismaClient.salesTarget.findMany({
@@ -14,10 +14,6 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
           type: 'MONTH',
           year: body?.year,
         },
-      });
-
-      console.log({
-        check: findSalesTarget.find((item) => item.month?.match('July')),
       });
 
       const [Jan, Feb, Mar, Apr, May, June, July, Aug, Sep, Oct, Nov, Dec] =
@@ -28,6 +24,11 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Jan?.start),
                 lte: parseDate(date?.Jan?.end),
               },
+              ...(body.productId && {
+                AND: {
+                  product_id: body.productId,
+                },
+              }),
             },
           }),
           await prismaClient.order.findMany({
@@ -36,6 +37,11 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Feb?.start),
                 lte: parseDate(date?.Feb?.end),
               },
+              ...(body.productId && {
+                AND: {
+                  product_id: body.productId,
+                },
+              }),
             },
           }),
           await prismaClient.order.findMany({
@@ -44,6 +50,11 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Mar?.start),
                 lte: parseDate(date?.Mar?.end),
               },
+              ...(body.productId && {
+                AND: {
+                  product_id: body.productId,
+                },
+              }),
             },
           }),
           await prismaClient.order.findMany({
@@ -52,6 +63,11 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Apr?.start),
                 lte: parseDate(date?.Apr?.end),
               },
+              ...(body.productId && {
+                AND: {
+                  product_id: body.productId,
+                },
+              }),
             },
           }),
           await prismaClient.order.findMany({
@@ -60,6 +76,11 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.May?.start),
                 lte: parseDate(date?.May?.end),
               },
+              ...(body.productId && {
+                AND: {
+                  product_id: body.productId,
+                },
+              }),
             },
           }),
           await prismaClient.order.findMany({
@@ -68,6 +89,11 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.June?.start),
                 lte: parseDate(date?.June?.end),
               },
+              ...(body.productId && {
+                AND: {
+                  product_id: body.productId,
+                },
+              }),
             },
           }),
           await prismaClient.order.findMany({
@@ -76,6 +102,11 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.July?.start),
                 lte: parseDate(date?.July?.end),
               },
+              ...(body.productId && {
+                AND: {
+                  product_id: body.productId,
+                },
+              }),
             },
           }),
           await prismaClient.order.findMany({
@@ -84,6 +115,11 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Aug?.start),
                 lte: parseDate(date?.Aug?.end),
               },
+              ...(body.productId && {
+                AND: {
+                  product_id: body.productId,
+                },
+              }),
             },
           }),
           await prismaClient.order.findMany({
@@ -92,6 +128,11 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Sep?.start),
                 lte: parseDate(date?.Sep?.end),
               },
+              ...(body.productId && {
+                AND: {
+                  product_id: body.productId,
+                },
+              }),
             },
           }),
           await prismaClient.order.findMany({
@@ -100,6 +141,11 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Oct?.start),
                 lte: parseDate(date?.Oct?.end),
               },
+              ...(body.productId && {
+                AND: {
+                  product_id: body.productId,
+                },
+              }),
             },
           }),
           await prismaClient.order.findMany({
@@ -108,6 +154,11 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Nov?.start),
                 lte: parseDate(date?.Nov?.end),
               },
+              ...(body.productId && {
+                AND: {
+                  product_id: body.productId,
+                },
+              }),
             },
           }),
           await prismaClient.order.findMany({
@@ -116,6 +167,11 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Dec?.start),
                 lte: parseDate(date?.Dec?.end),
               },
+              ...(body.productId && {
+                AND: {
+                  product_id: body.productId,
+                },
+              }),
             },
           }),
         ]);

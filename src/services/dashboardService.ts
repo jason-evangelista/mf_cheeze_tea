@@ -12,20 +12,33 @@ const dashboardApiService = baseApi.injectEndpoints({
       query: () => `/dashboard/product`,
       providesTags: ['Product'],
     }),
-    getAllDashboardOrder: builder.query<
+    createDashboarSalesdOrder: builder.mutation<
       BaseSuccessResponse<{
         orders: Order[];
         orderCount: number;
         totalSales: number;
+        date: {
+          type: 'Month';
+          label: string;
+        };
       }>,
-      void
+      {
+        type: string;
+        acroMonth: number | string;
+        year: number;
+        productId?: string;
+      }
     >({
-      query: () => `/dashboard/order`,
-      providesTags: ['Order'],
+      query: (body) => ({
+        url: `/dashboard/order`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Order'],
     }),
     createSalesByMonth: builder.mutation<
       BaseSuccessResponse<SalesMonth>,
-      { year: number }
+      { year: number; productId?: string }
     >({
       query: (body) => ({
         url: `/sales/month`,
@@ -50,7 +63,8 @@ const dashboardApiService = baseApi.injectEndpoints({
 
 export const {
   useGetAllDashboardProductQuery,
-  useGetAllDashboardOrderQuery,
+  useCreateDashboarSalesdOrderMutation,
+
   useCreateSalesByMonthMutation,
   useCreateSalesByYearMutation,
 } = dashboardApiService;

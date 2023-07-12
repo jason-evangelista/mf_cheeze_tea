@@ -1,13 +1,19 @@
 import CollapseSalesFilter from '@/components/DashboardPage/CollapseSalesFilter';
 import { DashboardContext } from '@/components/DashboardPage/DashboardContext';
+import { useGetAllProductQuery } from '@/services/productService';
 import { SalesMonth, SalesYear } from '@/types/Sales';
-import { Box, Button, useMantineTheme } from '@mantine/core';
+import {
+  Box,
+  Button,
+  Group,
+  LoadingOverlay,
+  useMantineTheme,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconAdjustmentsAlt, IconReportAnalytics } from '@tabler/icons-react';
 import { memo, useContext, useMemo } from 'react';
 import {
   CartesianGrid,
-  LabelList,
   Legend,
   Line,
   LineChart,
@@ -16,23 +22,40 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { CategoricalChartState } from 'recharts/types/chart/generateCategoricalChart';
 
 export type MainSaleGraphProps = {
   data?: SalesMonth | SalesYear;
   handleOpenSalesTarget: VoidFunction;
+  loading: boolean;
+  // eslint-disable-next-line no-unused-vars
+  handleLineClick: (e: CategoricalChartState) => void;
 };
 
 const domain = {
-  month: [0, 20000],
-  year: [0, 100000],
+  Month: [0, 20000],
+  Year: [0, 100000],
+  Today: [0, 5000],
   tickMonth: 10,
-  tickYear: 20,
+  tickYear: 15,
 };
 
-const MainSaleGraph = ({ data, handleOpenSalesTarget }: MainSaleGraphProps) => {
+const MainSaleGraph = ({
+  data,
+  loading,
+  handleOpenSalesTarget,
+  handleLineClick,
+}: MainSaleGraphProps) => {
   const { colors } = useMantineTheme();
   const [opened, { toggle }] = useDisclosure(false);
   const { salesType } = useContext(DashboardContext);
+
+  const { isLoading, data: productData } = useGetAllProductQuery({
+    currentPage: 0,
+    showAll: true,
+    skip: 0,
+    searchKey: undefined,
+  });
 
   const memoData = useMemo(() => {
     if (!data) return [];
@@ -42,28 +65,28 @@ const MainSaleGraph = ({ data, handleOpenSalesTarget }: MainSaleGraphProps) => {
     }));
   }, [data, salesType]);
 
-  const setLineLabel = ({ x, y, stroke, value }: any) => {
-    return (
-      <text
-        x={x}
-        y={y}
-        dy={-4}
-        fill={stroke}
-        fontSize={11}
-        textAnchor="middle"
-        fontWeight={700}
-      >
-        {new Intl.NumberFormat('fil-PH', {
-          style: 'currency',
-          currency: 'PHP',
-        }).format(value)}
-      </text>
-    );
-  };
+  // const setLineLabel = ({ x, y, stroke, value }: any) => {
+  //   return (
+  //     <text
+  //       x={x}
+  //       y={y}
+  //       dy={-4}
+  //       fill={stroke}
+  //       fontSize={11}
+  //       textAnchor="middle"
+  //       fontWeight={700}
+  //     >
+  //       {new Intl.NumberFormat('fil-PH', {
+  //         style: 'currency',
+  //         currency: 'PHP',
+  //       }).format(value)}
+  //     </text>
+  //   );
+  // };
 
   return (
-    <>
-      <div className="flex items-center gap-2 my-4">
+    <Box sx={{ width: '100%', overflow: 'hidden' }}>
+      <Group className="gap-2 my-4">
         <Button onClick={toggle} leftIcon={<IconAdjustmentsAlt />} size="xs">
           Filter Data
         </Button>
@@ -74,79 +97,93 @@ const MainSaleGraph = ({ data, handleOpenSalesTarget }: MainSaleGraphProps) => {
         >
           Sales Target
         </Button>
-      </div>
+      </Group>
       <Box>
-        <CollapseSalesFilter opened={opened} />
+        <CollapseSalesFilter
+          opened={opened}
+          isLoading={isLoading}
+          products={productData?.data?.products ?? []}
+        />
       </Box>
-      <ResponsiveContainer width="100%" height={500} className="text-sm">
-        {memoData.length ? (
-          <LineChart
-            data={memoData}
-            margin={{
-              top: 10,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis
-              dataKey="actual_sales"
-              domain={salesType === 'Month' ? domain.month : domain.year}
-              tickCount={
-                salesType === 'Month' ? domain.tickMonth : domain.tickYear
-              }
-            />
-            <Tooltip />
-            <Legend
-              margin={{ bottom: 10 }}
-              iconSize={20}
-              iconType="square"
-              fontSize={24}
-              fontWeight={800}
-              wrapperStyle={{
-                fontWeight: 600,
+      <div className="relative">
+        <LoadingOverlay visible={loading} />
+        <ResponsiveContainer
+          width="100%"
+          height={300}
+          className="text-[11px] cursor-pointer"
+        >
+          {memoData.length ? (
+            <LineChart
+              data={memoData}
+              margin={{
+                top: 10,
+                right: 30,
               }}
-            />
-            <Line
-              name="Sales Target"
-              type="monotone"
-              dataKey="sales_target"
-              strokeWidth={2}
-              stroke={colors.green[8]}
-              activeDot={{ r: 6 }}
+              onClick={handleLineClick}
             >
-              <LabelList content={(v) => setLineLabel(v)} />
-            </Line>
-            <Line
-              name="Actual Sales"
-              type="monotone"
-              strokeWidth={2}
-              dataKey="actual_sales"
-              stroke={colors.blue[8]}
-              activeDot={{ r: 6 }}
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis
+                dataKey="actual_sales"
+                domain={domain[salesType!]}
+                tickCount={
+                  salesType === 'Month' ? domain.tickMonth : domain.tickYear
+                }
+              />
+              <Tooltip />
+              <Legend
+                margin={{ bottom: 10 }}
+                iconSize={20}
+                iconType="square"
+                fontSize={24}
+                fontWeight={800}
+                wrapperStyle={{
+                  fontWeight: 600,
+                }}
+                className="cursor-pointer"
+              />
+              <Line
+                name="Sales Target"
+                type="monotone"
+                dataKey="sales_target"
+                strokeWidth={1}
+                stroke={colors.green[8]}
+                activeDot={{ r: 6 }}
+              >
+                {/* <LabelList content={(v) => setLineLabel(v)} /> */}
+              </Line>
+              <Line
+                name="Actual Sales"
+                type="monotone"
+                strokeWidth={1}
+                dataKey="actual_sales"
+                stroke={colors.blue[8]}
+                activeDot={{ r: 6 }}
+              >
+                {/* <LabelList content={(v) => setLineLabel(v)} /> */}
+              </Line>
+            </LineChart>
+          ) : (
+            <LineChart
+              data={[]}
+              margin={{
+                top: 10,
+              }}
             >
-              <LabelList content={(v) => setLineLabel(v)} />
-            </Line>
-          </LineChart>
-        ) : (
-          <LineChart
-            data={[]}
-            margin={{
-              top: 10,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis
-              dataKey="actual_sales"
-              domain={salesType === 'Month' ? domain.month : domain.year}
-              tickCount={
-                salesType === 'Month' ? domain.tickMonth : domain.tickYear
-              }
-            />
-          </LineChart>
-        )}
-      </ResponsiveContainer>
-    </>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis
+                dataKey="actual_sales"
+                domain={domain[salesType!]}
+                tickCount={
+                  salesType === 'Month' ? domain.tickMonth : domain.tickYear
+                }
+              />
+            </LineChart>
+          )}
+        </ResponsiveContainer>
+      </div>
+    </Box>
   );
 };
 
