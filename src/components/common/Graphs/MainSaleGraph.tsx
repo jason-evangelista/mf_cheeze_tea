@@ -7,12 +7,21 @@ import {
   Button,
   Group,
   LoadingOverlay,
+  Select,
   useMantineTheme,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconAdjustmentsAlt, IconReportAnalytics } from '@tabler/icons-react';
-import { memo, useContext, useMemo } from 'react';
 import {
+  IconAdjustmentsAlt,
+  IconChartLine,
+  IconReportAnalytics,
+} from '@tabler/icons-react';
+import { memo, useContext, useMemo, useState } from 'react';
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
   CartesianGrid,
   Legend,
   Line,
@@ -49,6 +58,7 @@ const MainSaleGraph = ({
   const { colors } = useMantineTheme();
   const [opened, { toggle }] = useDisclosure(false);
   const { salesType } = useContext(DashboardContext);
+  const [chart, setChart] = useState<'Line' | 'Bar' | 'Line Filled'>('Line');
 
   const { isLoading, data: productData } = useGetAllProductQuery({
     currentPage: 0,
@@ -65,25 +75,6 @@ const MainSaleGraph = ({
     }));
   }, [data, salesType]);
 
-  // const setLineLabel = ({ x, y, stroke, value }: any) => {
-  //   return (
-  //     <text
-  //       x={x}
-  //       y={y}
-  //       dy={-4}
-  //       fill={stroke}
-  //       fontSize={11}
-  //       textAnchor="middle"
-  //       fontWeight={700}
-  //     >
-  //       {new Intl.NumberFormat('fil-PH', {
-  //         style: 'currency',
-  //         currency: 'PHP',
-  //       }).format(value)}
-  //     </text>
-  //   );
-  // };
-
   return (
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
       <Group className="gap-2 my-4">
@@ -97,6 +88,13 @@ const MainSaleGraph = ({
         >
           Sales Target
         </Button>
+        <Select
+          defaultValue={chart}
+          data={['Line', 'Bar', 'Line Filled']}
+          size="xs"
+          icon={<IconChartLine />}
+          onChange={(e) => setChart(e as 'Line' | 'Bar' | 'Line Filled')}
+        />
       </Group>
       <Box>
         <CollapseSalesFilter
@@ -106,82 +104,231 @@ const MainSaleGraph = ({
         />
       </Box>
       <div className="relative">
-        <LoadingOverlay visible={loading} />
-        <ResponsiveContainer
-          width="100%"
-          height={300}
-          className="text-[11px] cursor-pointer"
-        >
-          {memoData.length ? (
-            <LineChart
-              data={memoData}
-              margin={{
-                top: 10,
-                right: 30,
-              }}
-              onClick={handleLineClick}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis
-                dataKey="actual_sales"
-                domain={domain[salesType!]}
-                tickCount={
-                  salesType === 'Month' ? domain.tickMonth : domain.tickYear
-                }
-              />
-              <Tooltip />
-              <Legend
-                margin={{ bottom: 10 }}
-                iconSize={20}
-                iconType="square"
-                fontSize={24}
-                fontWeight={800}
-                wrapperStyle={{
-                  fontWeight: 600,
+        <LoadingOverlay visible={loading} zIndex={1} />
+        {chart === 'Line' && (
+          <ResponsiveContainer
+            width="100%"
+            height={300}
+            className="text-[11px] cursor-pointer"
+          >
+            {memoData.length ? (
+              <LineChart
+                data={memoData}
+                margin={{
+                  top: 10,
+                  right: 30,
                 }}
-                className="cursor-pointer"
-              />
-              <Line
-                name="Sales Target"
-                type="monotone"
-                dataKey="sales_target"
-                strokeWidth={1}
-                stroke={colors.green[8]}
-                activeDot={{ r: 6 }}
+                onClick={handleLineClick}
+                style={{
+                  cursor: 'pointer',
+                }}
               >
-                {/* <LabelList content={(v) => setLineLabel(v)} /> */}
-              </Line>
-              <Line
-                name="Actual Sales"
-                type="monotone"
-                strokeWidth={1}
-                dataKey="actual_sales"
-                stroke={colors.blue[8]}
-                activeDot={{ r: 6 }}
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis
+                  dataKey="actual_sales"
+                  domain={domain[salesType!]}
+                  tickCount={
+                    salesType === 'Month' ? domain.tickMonth : domain.tickYear
+                  }
+                />
+                <Tooltip />
+                <Legend
+                  margin={{ bottom: 10 }}
+                  iconSize={20}
+                  iconType="square"
+                  fontSize={24}
+                  fontWeight={800}
+                  wrapperStyle={{
+                    fontWeight: 600,
+                  }}
+                  className="cursor-pointer"
+                />
+                <Line
+                  name="Sales Target"
+                  type="monotone"
+                  dataKey="sales_target"
+                  strokeWidth={1}
+                  stroke={colors.green[8]}
+                  activeDot={{ r: 6 }}
+                >
+                  {/* <LabelList content={(v) => setLineLabel(v)} /> */}
+                </Line>
+                <Line
+                  name="Actual Sales"
+                  type="monotone"
+                  strokeWidth={1}
+                  dataKey="actual_sales"
+                  stroke={colors.blue[8]}
+                  activeDot={{ r: 6 }}
+                >
+                  {/* <LabelList content={(v) => setLineLabel(v)} /> */}
+                </Line>
+              </LineChart>
+            ) : (
+              <LineChart
+                data={[]}
+                margin={{
+                  top: 10,
+                }}
               >
-                {/* <LabelList content={(v) => setLineLabel(v)} /> */}
-              </Line>
-            </LineChart>
-          ) : (
-            <LineChart
-              data={[]}
-              margin={{
-                top: 10,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis
-                dataKey="actual_sales"
-                domain={domain[salesType!]}
-                tickCount={
-                  salesType === 'Month' ? domain.tickMonth : domain.tickYear
-                }
-              />
-            </LineChart>
-          )}
-        </ResponsiveContainer>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis
+                  dataKey="actual_sales"
+                  domain={domain[salesType!]}
+                  tickCount={
+                    salesType === 'Month' ? domain.tickMonth : domain.tickYear
+                  }
+                />
+              </LineChart>
+            )}
+          </ResponsiveContainer>
+        )}
+        {chart === 'Bar' && (
+          <ResponsiveContainer
+            width="100%"
+            height={300}
+            className="text-[11px] cursor-pointer"
+          >
+            {memoData.length ? (
+              <BarChart
+                data={memoData}
+                margin={{
+                  top: 10,
+                  right: 30,
+                }}
+                onClick={handleLineClick}
+                style={{
+                  cursor: 'pointer',
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis
+                  dataKey="actual_sales"
+                  domain={domain[salesType!]}
+                  tickCount={
+                    salesType === 'Month' ? domain.tickMonth : domain.tickYear
+                  }
+                />
+                <Tooltip />
+                <Legend
+                  margin={{ bottom: 10 }}
+                  iconSize={20}
+                  iconType="square"
+                  fontSize={24}
+                  fontWeight={800}
+                  wrapperStyle={{
+                    fontWeight: 600,
+                  }}
+                  className="cursor-pointer"
+                />
+                <Bar
+                  name="Sales Target"
+                  dataKey="sales_target"
+                  fill={colors.green[8]}
+                />
+                <Bar
+                  name="Actual Sales"
+                  dataKey="actual_sales"
+                  fill={colors.blue[8]}
+                />
+              </BarChart>
+            ) : (
+              <BarChart
+                data={[]}
+                margin={{
+                  top: 10,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis
+                  dataKey="actual_sales"
+                  domain={domain[salesType!]}
+                  tickCount={
+                    salesType === 'Month' ? domain.tickMonth : domain.tickYear
+                  }
+                />
+              </BarChart>
+            )}
+          </ResponsiveContainer>
+        )}
+        {chart === 'Line Filled' && (
+          <ResponsiveContainer
+            width="100%"
+            height={300}
+            className="text-[11px] cursor-pointer"
+          >
+            {memoData.length ? (
+              <AreaChart
+                data={memoData}
+                margin={{
+                  top: 10,
+                  right: 30,
+                }}
+                onClick={handleLineClick}
+                style={{
+                  cursor: 'pointer',
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis
+                  dataKey="actual_sales"
+                  domain={domain[salesType!]}
+                  tickCount={
+                    salesType === 'Month' ? domain.tickMonth : domain.tickYear
+                  }
+                />
+                <Tooltip />
+                <Legend
+                  margin={{ bottom: 10 }}
+                  iconSize={20}
+                  iconType="square"
+                  fontSize={24}
+                  fontWeight={800}
+                  wrapperStyle={{
+                    fontWeight: 600,
+                  }}
+                  className="cursor-pointer"
+                />
+                <Area
+                  type="linear"
+                  name="Sales Target"
+                  dataKey="sales_target"
+                  fill={colors.green[8]}
+                  stroke={colors.green[8]}
+                />
+                <Area
+                  type="linear"
+                  name="Actual Sales"
+                  dataKey="actual_sales"
+                  stroke={colors.blue[8]}
+                  fill={colors.blue[8]}
+                />
+              </AreaChart>
+            ) : (
+              <BarChart
+                data={[]}
+                margin={{
+                  top: 10,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis
+                  dataKey="actual_sales"
+                  domain={domain[salesType!]}
+                  tickCount={
+                    salesType === 'Month' ? domain.tickMonth : domain.tickYear
+                  }
+                />
+              </BarChart>
+            )}
+          </ResponsiveContainer>
+        )}
       </div>
     </Box>
   );

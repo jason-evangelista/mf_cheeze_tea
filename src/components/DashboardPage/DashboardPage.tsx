@@ -47,10 +47,12 @@ const DashboardPage = () => {
     yearRange,
     productId,
     dashboardOrdersMonth,
+    dashboardOrdersYear,
   } = useContext(DashboardContext);
   const [opened, { open, close }] = useDisclosure(false);
 
   const dashboardProduct = useGetAllDashboardProductQuery();
+
   const [createDashboardOrderSR, dashboardOrderState] =
     useCreateDashboarSalesdOrderMutation();
 
@@ -61,20 +63,12 @@ const DashboardPage = () => {
   const categoryPerformance = useGetAllCategoryPerformanceQuery();
 
   const handleLineClick = async (e: CategoricalChartState) => {
-    // if (e?.activeLabel && !isNaN(Number(e.activeLabel))) {
-    // }
     if (e?.activeLabel && typeof e.activeLabel === 'string') {
       router.replace({
         pathname: router.pathname,
         query: {
           v: e?.activeLabel,
         },
-      });
-      createDashboardOrderSR({
-        acroMonth: e.activeLabel,
-        type: 'Month',
-        year: dashboardOrdersMonth?.year ?? 0,
-        productId: dashboardOrdersMonth?.productId,
       });
     }
   };
@@ -133,11 +127,11 @@ const DashboardPage = () => {
   }, [salesYear, salesType, productId?.month]);
 
   useEffect(() => {
-    if (salesType === 'Year' && yearRange) {
+    if (salesType === 'Year' && yearRange?.start_year && yearRange?.end_year) {
       salesMonthState.reset();
       createSalesYear(yearRange);
     }
-  }, [salesType, yearRange]);
+  }, [salesType, yearRange?.start_year, yearRange?.end_year]);
 
   useEffect(() => {
     if (!dashboardOrdersMonth) return;
@@ -146,11 +140,19 @@ const DashboardPage = () => {
         acroMonth: (router?.query?.v as string) ?? '',
         type: 'Month',
         year: salesYear ?? 0,
-        productId: dashboardOrdersMonth?.productId,
+        productId: dashboardOrdersMonth.productId,
+      });
+    }
+    if (salesType === 'Year') {
+      createDashboardOrderSR({
+        type: 'Year',
+        year: +(router?.query?.v as string) || new Date().getFullYear(),
+        productId: dashboardOrdersYear?.productId,
       });
     }
   }, [
     dashboardOrdersMonth?.productId,
+    dashboardOrdersYear?.productId,
     dashboardOrdersMonth?.year,
     salesType,
     router?.query?.v,

@@ -30,8 +30,6 @@ type DashBoardContextProps = {
   };
   dashboardOrdersYear: {
     productId?: string;
-    start_year: Date;
-    end_year: Date;
   };
 
   // eslint-disable-next-line no-unused-vars
@@ -44,12 +42,9 @@ type DashBoardContextProps = {
   }) => void;
   handleDashboardOrdersYear: (
     // eslint-disable-next-line no-unused-vars
-    start_year: Date,
-    // eslint-disable-next-line no-unused-vars
-    end_year: Date,
-    // eslint-disable-next-line no-unused-vars
     productId?: string
   ) => void;
+  handleFilterYearRange: (arg: { start: number; end: number }) => void;
 };
 
 export const DashboardContext = createContext<Partial<DashBoardContextProps>>(
@@ -84,13 +79,8 @@ const DashboardContextProvider = ({ children }: PropsWithChildren) => {
   });
 
   const [dashboardOrdersYear, setDashboardOrdersYear] = useState<{
-    start_year: Date;
-    end_year: Date;
     productId?: string;
-  }>({
-    start_year: new Date(),
-    end_year: new Date(2028, 1, 1),
-  });
+  }>({});
 
   const handleChangeSalesType = (sales: 'Today' | 'Month' | 'Year') => {
     setSalesType(sales);
@@ -104,6 +94,16 @@ const DashboardContextProvider = ({ children }: PropsWithChildren) => {
     setYearRange({ ...yearRange, start_year: start });
   const handleYearSaleEnd = (end: number) =>
     setYearRange({ ...yearRange, end_year: end });
+
+  const handleFilterYearRange = ({
+    start,
+    end,
+  }: {
+    start: number;
+    end: number;
+  }) => {
+    setYearRange({ start_year: start, end_year: end });
+  };
 
   const handleSetProductId = (id: string, type: 'Today' | 'Month' | 'Year') => {
     if (type === 'Today') {
@@ -127,15 +127,9 @@ const DashboardContextProvider = ({ children }: PropsWithChildren) => {
     });
   };
 
-  const handleDashboardOrdersYear = (
-    start_year: Date,
-    end_year: Date,
-    productId?: string
-  ) => {
+  const handleDashboardOrdersYear = (productId?: string) => {
     setDashboardOrdersYear({
       ...dashboardOrdersYear,
-      end_year,
-      start_year,
       productId,
     });
   };
@@ -156,6 +150,7 @@ const DashboardContextProvider = ({ children }: PropsWithChildren) => {
         handleYearSaleStart,
         handleYearSaleEnd,
         handleSetProductId,
+        handleFilterYearRange,
       }}
     >
       {children}

@@ -1,6 +1,6 @@
 import { parseMonthToNumber } from '@/constants/parseMonth';
 import { prismaClient } from '@/utils/prismaClient';
-import { endOfMonth, format } from 'date-fns';
+import { endOfMonth, endOfYear, format, startOfYear } from 'date-fns';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -54,9 +54,24 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
       }
 
       if (query.type === 'Year') {
+        const body = req.body as {
+          type: string;
+          year: string;
+          productId?: string;
+        };
         const getOrders = await prismaClient.order.findMany({
-          where: { status: 'ACTIVE', order_date: {} },
+          where: {
+            status: 'ACTIVE',
+            order_date: {
+              gte: startOfYear(new Date(+body.year, 0)),
+              lte: endOfYear(new Date(+body.year, 0)),
+            },
+            ...(query.productId && {
+              product_id: query.productId,
+            }),
+          },
         });
+
         const totalSales = getOrders.reduce(
           (prev, { sub_total }) => prev + sub_total,
           0
@@ -64,7 +79,15 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
 
         return res.status(200).json({
           message: 'Successfully fetch products',
-          data: { orders: getOrders, orderCount: getOrders.length, totalSales },
+          data: {
+            orders: getOrders,
+            orderCount: getOrders.length,
+            totalSales,
+            date: {
+              type: 'Year',
+              label: format(new Date(+body?.year, 0), 'yyyy'),
+            },
+          },
         });
       }
     }

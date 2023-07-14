@@ -18,13 +18,13 @@ const dashboardApiService = baseApi.injectEndpoints({
         orderCount: number;
         totalSales: number;
         date: {
-          type: 'Month';
+          type: 'Month' | 'Year';
           label: string;
         };
       }>,
       {
-        type: string;
-        acroMonth: number | string;
+        type: 'Month' | 'Year';
+        acroMonth?: number | string;
         year: number;
         productId?: string;
       }

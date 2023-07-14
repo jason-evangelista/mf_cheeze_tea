@@ -34,6 +34,7 @@ const salesTargetApi = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     if (req.method === 'POST' && body.type === 'Year') {
+      console.log({ body });
       const findSalesTargetYear = await prismaClient.salesTarget.findFirst({
         where: {
           type: 'YEAR',
@@ -45,15 +46,11 @@ const salesTargetApi = async (req: NextApiRequest, res: NextApiResponse) => {
 
       const upsertMonthSalesTarget = await prismaClient.salesTarget.upsert({
         where: {
-          ...(findSalesTargetYear?.id
-            ? { id: findSalesTargetYear?.id }
-            : {
-                id: findSalesTargetYear?.id,
-                month_year: {
-                  month: findSalesTargetYear?.month ?? '',
-                  year: findSalesTargetYear?.year ?? 0,
-                },
-              }),
+          id: findSalesTargetYear?.id,
+          month_year: {
+            month: '',
+            year: findSalesTargetYear?.year || body?.year!,
+          },
         },
         create: {
           target: body?.sales_target ?? 0,
