@@ -2,6 +2,7 @@ import { Collapse, Divider, LoadingOverlay, Select, Tabs } from '@mantine/core';
 import { DatePickerInput, YearPickerInput } from '@mantine/dates';
 import { Product } from '@prisma/client';
 import { IconCalendar } from '@tabler/icons-react';
+import { format } from 'date-fns';
 import { useRouter } from 'next/router';
 import { memo, useContext, useMemo } from 'react';
 import { DashboardContext } from './DashboardContext';
@@ -25,6 +26,8 @@ const CollapseSalesFilter = ({
     handleDashboardOrdersMonth,
     handleFilterYearRange,
     handleDashboardOrdersYear,
+    handleDashboardOrdersDay,
+    dashboardOrderDay,
     dashboardOrdersMonth,
   } = useContext(DashboardContext);
 
@@ -73,11 +76,31 @@ const CollapseSalesFilter = ({
           <Tabs.Panel value="Today" className="px-4">
             <LoadingOverlay visible={isLoading} />
             <div className="max-w-[30%] flex flex-col gap-2">
-              <Select data={memoProductData} placeholder="Select Product" />
+              <Select
+                clearable
+                data={memoProductData}
+                placeholder="Select Product"
+                onChange={(e) => {
+                  if (typeof handleSetProductId === 'function')
+                    handleSetProductId(e ?? '', 'Today');
+                  if (typeof handleDashboardOrdersDay === 'function')
+                    handleDashboardOrdersDay({
+                      ...dashboardOrderDay,
+                      productId: e ?? '',
+                    });
+                }}
+              />
               <DatePickerInput
                 placeholder="Select Date"
                 type="range"
-                onChange={(e) => console.log({ e })}
+                onChange={(e) => {
+                  if (!e[0] || !e[1]) return;
+                  if (typeof handleDashboardOrdersDay === 'function')
+                    handleDashboardOrdersDay({
+                      start_date: format(e[0], 'yyyy-MM-dd'),
+                      end_date: format(e[1], 'yyyy-MM-dd'),
+                    });
+                }}
               />
             </div>
           </Tabs.Panel>
@@ -85,12 +108,12 @@ const CollapseSalesFilter = ({
             <LoadingOverlay visible={isLoading} />
             <div className="max-w-[30%] flex flex-col gap-2">
               <Select
-                clearable
                 data={memoProductData}
+                clearable
                 placeholder="Select Product"
                 onChange={(e) => {
                   if (typeof handleSetProductId === 'function')
-                    handleSetProductId(e as string, 'Month');
+                    handleSetProductId(e ?? '', 'Month');
                   if (typeof handleDashboardOrdersMonth === 'function')
                     handleDashboardOrdersMonth({ productId: e ?? '' });
                 }}
@@ -117,10 +140,10 @@ const CollapseSalesFilter = ({
                 clearable
                 onChange={(e) => {
                   if (typeof handleSetProductId === 'function')
-                    handleSetProductId(e as string, 'Year');
+                    handleSetProductId(e ?? '', 'Year');
 
                   if (typeof handleDashboardOrdersYear === 'function')
-                    handleDashboardOrdersYear(e as string);
+                    handleDashboardOrdersYear(e ?? '');
                 }}
               />
               <YearPickerInput

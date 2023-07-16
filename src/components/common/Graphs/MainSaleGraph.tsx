@@ -60,6 +60,8 @@ const MainSaleGraph = ({
   const { salesType } = useContext(DashboardContext);
   const [chart, setChart] = useState<'Line' | 'Bar' | 'Line Filled'>('Line');
 
+  const isDay = salesType === 'Today';
+
   const { isLoading, data: productData } = useGetAllProductQuery({
     currentPage: 0,
     showAll: true,
@@ -144,16 +146,19 @@ const MainSaleGraph = ({
                   }}
                   className="cursor-pointer"
                 />
-                <Line
-                  name="Sales Target"
-                  type="monotone"
-                  dataKey="sales_target"
-                  strokeWidth={1}
-                  stroke={colors.green[8]}
-                  activeDot={{ r: 6 }}
-                >
-                  {/* <LabelList content={(v) => setLineLabel(v)} /> */}
-                </Line>
+                {!isDay && (
+                  <Line
+                    name="Sales Target"
+                    type="monotone"
+                    dataKey="sales_target"
+                    strokeWidth={1}
+                    stroke={colors.green[8]}
+                    activeDot={{ r: 6 }}
+                  >
+                    {/* <LabelList content={(v) => setLineLabel(v)} /> */}
+                  </Line>
+                )}
+
                 <Line
                   name="Actual Sales"
                   type="monotone"
@@ -224,11 +229,14 @@ const MainSaleGraph = ({
                   }}
                   className="cursor-pointer"
                 />
-                <Bar
-                  name="Sales Target"
-                  dataKey="sales_target"
-                  fill={colors.green[8]}
-                />
+                {!isDay && (
+                  <Bar
+                    name="Sales Target"
+                    dataKey="sales_target"
+                    fill={colors.green[8]}
+                  />
+                )}
+
                 <Bar
                   name="Actual Sales"
                   dataKey="actual_sales"
@@ -294,13 +302,16 @@ const MainSaleGraph = ({
                   }}
                   className="cursor-pointer"
                 />
-                <Area
-                  type="linear"
-                  name="Sales Target"
-                  dataKey="sales_target"
-                  fill={colors.green[8]}
-                  stroke={colors.green[8]}
-                />
+                {!isDay && (
+                  <Area
+                    type="linear"
+                    name="Sales Target"
+                    dataKey="sales_target"
+                    fill={colors.green[8]}
+                    stroke={colors.green[8]}
+                  />
+                )}
+
                 <Area
                   type="linear"
                   name="Actual Sales"

@@ -1,29 +1,26 @@
 /* eslint-disable no-unused-vars */
+import { add, format } from 'date-fns';
 import { PropsWithChildren, createContext, useState } from 'react';
 
 type DashBoardContextProps = {
-  // eslint-disable-next-line no-unused-vars
   handleChangeSalesType: (sales_type: 'Today' | 'Month' | 'Year') => void;
-  // eslint-disable-next-line no-unused-vars
   handleSetSaleYear: (year: number) => void;
   salesType: 'Today' | 'Month' | 'Year';
+
+  // For month year
   salesYear: number;
   yearRange: {
     start_year: number;
     end_year: number;
   };
-  // eslint-disable-next-line no-unused-vars
   handleYearSaleStart: (_: number) => void;
-  // eslint-disable-next-line no-unused-vars
   handleYearSaleEnd: (_: number) => void;
   productId: {
     today: string;
     month: string;
     year: string;
   };
-  // eslint-disable-next-line no-unused-vars
   handleSetProductId: (_: string, _t: 'Today' | 'Month' | 'Year') => void;
-
   dashboardOrdersMonth: {
     productId?: string;
     year: number;
@@ -31,19 +28,19 @@ type DashBoardContextProps = {
   dashboardOrdersYear: {
     productId?: string;
   };
-
-  // eslint-disable-next-line no-unused-vars
-  handleDashboardOrdersMonth: ({
-    year,
-    productId,
-  }: {
+  dashboardOrderDay: {
+    start_date?: string;
+    end_date?: string;
+    productId?: string;
+  };
+  handleDashboardOrdersDay: (
+    params: DashBoardContextProps['dashboardOrderDay']
+  ) => void;
+  handleDashboardOrdersMonth: (params: {
     year?: number;
     productId?: string;
   }) => void;
-  handleDashboardOrdersYear: (
-    // eslint-disable-next-line no-unused-vars
-    productId?: string
-  ) => void;
+  handleDashboardOrdersYear: (productId?: string) => void;
   handleFilterYearRange: (arg: { start: number; end: number }) => void;
 };
 
@@ -69,6 +66,13 @@ const DashboardContextProvider = ({ children }: PropsWithChildren) => {
     month: '',
     today: '',
     year: '',
+  });
+
+  const [dashboardOrderDay, setDashboardOrderDay] = useState<
+    Partial<DashBoardContextProps['dashboardOrderDay']>
+  >({
+    start_date: format(new Date(), 'yyyy-MM-dd'),
+    end_date: format(add(new Date(), { days: 5 }), 'yyyy-MM-dd'),
   });
 
   const [dashboardOrdersMonth, setDashboardOrderMonth] = useState<{
@@ -134,6 +138,12 @@ const DashboardContextProvider = ({ children }: PropsWithChildren) => {
     });
   };
 
+  const handleDashboardOrdersDay = (
+    args: Partial<DashBoardContextProps['dashboardOrderDay']>
+  ) => {
+    setDashboardOrderDay({ ...args });
+  };
+
   return (
     <DashboardContext.Provider
       value={{
@@ -143,6 +153,8 @@ const DashboardContextProvider = ({ children }: PropsWithChildren) => {
         yearRange,
         dashboardOrdersMonth,
         dashboardOrdersYear,
+        dashboardOrderDay,
+        handleDashboardOrdersDay,
         handleDashboardOrdersYear,
         handleDashboardOrdersMonth,
         handleChangeSalesType,

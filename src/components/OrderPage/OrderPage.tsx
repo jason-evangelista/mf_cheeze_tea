@@ -1,27 +1,52 @@
 import useToggleContainer from '@/hooks/useToggleContainer';
-import { Paper } from '@mantine/core';
-import Button from '../common/Button';
+import { Button, Modal, Paper } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { IconPlus } from '@tabler/icons-react';
+import { useState } from 'react';
 import OrderForm from './OrderForm';
 import OrderListTable from './OrderListTable';
 
 const OrderPage = () => {
-  const { isOpen, handleToggle, handleClose } = useToggleContainer();
+  const [isProductSelected, setIsProductSelected] = useState(false);
+  const { isOpen, handleToggle } = useToggleContainer();
+  const [opened, { close, open }] = useDisclosure(false);
+
+  const handleIsProductSelected = () => {
+    setIsProductSelected(true);
+  };
+
+  const handleCloseModal = () => {
+    close();
+    setIsProductSelected(false);
+  };
 
   return (
     <Paper radius="md" className="p-4">
-      {isOpen && (
+      <Modal
+        classNames={{
+          content: isProductSelected ? '' : 'overflow-y-visible',
+        }}
+        title={<span className="font-semibold">Order</span>}
+        opened={opened}
+        onClose={handleCloseModal}
+      >
         <OrderForm
           isOpen={isOpen}
           handleToggle={handleToggle}
-          handleClose={handleClose}
+          handleClose={handleCloseModal}
+          handleisProductSelected={handleIsProductSelected}
         />
-      )}
+      </Modal>
       <div className="flex justify-end">
         <Button
-          btnTitle="Add Order"
-          className="bg-green-500 text-xs my-2"
-          onClick={handleToggle}
-        />
+          size="xs"
+          color="green"
+          className=" my-2"
+          onClick={open}
+          leftIcon={<IconPlus />}
+        >
+          Add Order
+        </Button>
       </div>
       <OrderListTable />
     </Paper>
