@@ -12,20 +12,51 @@ const dashboardApiService = baseApi.injectEndpoints({
       query: () => `/dashboard/product`,
       providesTags: ['Product'],
     }),
-    getAllDashboardOrder: builder.query<
+    createDashboarSalesdOrder: builder.mutation<
       BaseSuccessResponse<{
         orders: Order[];
         orderCount: number;
         totalSales: number;
+        isSalesGrow: boolean;
+        growPercentage: string;
+        date: {
+          type: 'Month' | 'Year' | 'Today';
+          label: string;
+        };
+        behindDate: {
+          totalSales: number;
+          date: string;
+        };
       }>,
-      void
+      {
+        type: 'Month' | 'Year' | 'Today';
+        acroMonth?: number | string;
+        year?: number;
+        productId?: string;
+        singleDay?: string;
+      }
     >({
-      query: () => `/dashboard/order`,
-      providesTags: ['Order'],
+      query: (body) => ({
+        url: `/dashboard/order`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Order'],
+    }),
+    createSalesByDay: builder.mutation<
+      BaseSuccessResponse<SalesMonth>,
+      { start_date: string; end_date: string; productId?: string }
+    >({
+      query: (body) => ({
+        url: `/sales/today`,
+        body,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Sale'],
     }),
     createSalesByMonth: builder.mutation<
       BaseSuccessResponse<SalesMonth>,
-      { year: number }
+      { year: number; productId?: string }
     >({
       query: (body) => ({
         url: `/sales/month`,
@@ -36,7 +67,7 @@ const dashboardApiService = baseApi.injectEndpoints({
     }),
     createSalesByYear: builder.mutation<
       BaseSuccessResponse<SalesYear>,
-      { start_year: number; end_year: number }
+      { start_year: number; end_year: number; productId?: string }
     >({
       query: (body) => ({
         url: `/sales/year`,
@@ -50,7 +81,8 @@ const dashboardApiService = baseApi.injectEndpoints({
 
 export const {
   useGetAllDashboardProductQuery,
-  useGetAllDashboardOrderQuery,
+  useCreateDashboarSalesdOrderMutation,
+  useCreateSalesByDayMutation,
   useCreateSalesByMonthMutation,
   useCreateSalesByYearMutation,
 } = dashboardApiService;

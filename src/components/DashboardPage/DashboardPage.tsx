@@ -1,156 +1,485 @@
 import {
+  useCreateDashboarSalesdOrderMutation,
+  useCreateSalesByDayMutation,
   useCreateSalesByMonthMutation,
   useCreateSalesByYearMutation,
-  useGetAllDashboardOrderQuery,
   useGetAllDashboardProductQuery,
 } from '@/services/dashboardService';
-import Card from '../common/Card';
 
-import useToggleContainer from '@/hooks/useToggleContainer';
 import {
   useGetAllCategoryPerformanceQuery,
   useGetAllProductPerformanceQuery,
 } from '@/services/productService';
-import { ProductType } from '@prisma/client';
-import { IconFilter, IconSettings } from '@tabler/icons-react';
-import { useContext, useEffect } from 'react';
+import {
+  Badge,
+  Box,
+  Divider,
+  Group,
+  Loader,
+  LoadingOverlay,
+  Modal,
+  Paper,
+  ScrollArea,
+  Tabs,
+  Text,
+  Timeline,
+  Title,
+  useMantineTheme,
+} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { Order } from '@prisma/client';
+import {
+  IconCategory2,
+  IconGauge,
+  IconTrendingDown,
+  IconTrendingUp,
+} from '@tabler/icons-react';
+import { format } from 'date-fns';
+import { useRouter } from 'next/router';
+import { useContext, useEffect, useMemo } from 'react';
+import { CategoricalChartState } from 'recharts/types/chart/generateCategoricalChart';
 import CategoryPerfGraph from '../common/Graphs/CategoryPerfGraph';
 import MainSaleGraph from '../common/Graphs/MainSaleGraph';
 import ProductPerfGraph from '../common/Graphs/ProductPerfGraph';
-import Loading from '../common/Loading';
 import PriceDisplay from '../common/PriceDisplay';
 import { DashboardContext } from './DashboardContext';
-import SalesFilter from './SalesFilter';
 import SalesSettings from './SalesSettings';
 
-const PRODUCT_TYPE: ProductType[] = [
-  'CHEEZE_TEA',
-  'GREEN_TEA_AND_LEMONADE',
-  'MILK_TEA',
-  'SERRADURA',
-];
-
 const DashboardPage = () => {
-  const { salesYear, handleSetSaleYear, salesType, yearRange } =
-    useContext(DashboardContext);
+  const router = useRouter();
+  const { colors } = useMantineTheme();
+  const {
+    salesYear,
+    handleSetSaleYear,
+    salesType,
+    yearRange,
+    productId,
+    dashboardOrdersMonth,
+    dashboardOrdersYear,
+    dashboardOrderDay,
+  } = useContext(DashboardContext);
+  const [opened, { open, close }] = useDisclosure(false);
+
   const dashboardProduct = useGetAllDashboardProductQuery();
-  const dashboardOrder = useGetAllDashboardOrderQuery();
+
+  const [createDashboardOrderSR, dashboardOrderState] =
+    useCreateDashboarSalesdOrderMutation();
+
+  const [createSalesDay, salesDayState] = useCreateSalesByDayMutation();
   const [createSalesMonth, salesMonthState] = useCreateSalesByMonthMutation();
   const [createSalesYear, salesYearState] = useCreateSalesByYearMutation();
 
   const productPerformance = useGetAllProductPerformanceQuery();
   const categoryPerformance = useGetAllCategoryPerformanceQuery();
 
-  const { handleToggle, isOpen, handleClose } = useToggleContainer();
-  const modalToggle = useToggleContainer();
+  const handleLineClick = async (e: CategoricalChartState) => {
+    if (salesType === 'Month' || salesType === 'Year') {
+      if (e?.activeLabel && typeof e.activeLabel === 'string') {
+        router.replace({
+          pathname: router.pathname,
+          query: {
+            v: e?.activeLabel,
+          },
+        });
+      }
+    }
+
+    if (salesType === 'Today') {
+      if (e?.activeLabel && typeof e.activeLabel === 'string') {
+        router.replace({
+          pathname: router.pathname,
+          query: {
+            v: e?.activePayload?.[0]?.payload?.date_value,
+          },
+        });
+      }
+    }
+  };
+
+  const salesNotValid =
+    dashboardOrderState?.data?.data?.growPercentage.includes('Infinity') ||
+    dashboardOrderState?.data?.data?.growPercentage.includes('NaN');
+
+  const memoBestSellingProduct = useMemo(() => {
+    if (!dashboardOrderState?.data?.data?.orders?.length) return [];
+    return structuredClone(
+      dashboardOrderState?.data?.data?.orders ?? []
+    ).reduce((acc, { product_id }) => {
+      const findProduct = dashboardProduct?.data?.data?.products.find(
+        (product) => product.id.match(product_id)
+      );
+
+      return (
+        // @ts-ignore
+        acc[findProduct?.name]
+          ? //@ts-ignore
+            (acc[findProduct?.name] = {
+              //@ts-ignore
+              count: acc[findProduct?.name].count + 1,
+              totalSales: dashboardOrderState?.data?.data?.orders.filter(
+                (order) => order.product_id.match(product_id)
+              ),
+            })
+          : //@ts-ignore
+            (acc[findProduct?.name] = {
+              count: 1,
+              totalSales: dashboardOrderState?.data?.data?.orders.filter(
+                (order) => order.product_id.match(product_id)
+              ),
+            }),
+        acc
+      );
+    }, {});
+  }, [
+    dashboardOrderState?.data?.data?.orders,
+    dashboardProduct?.data?.data?.products,
+  ]);
 
   useEffect(() => {
     if (typeof handleSetSaleYear === 'function')
       handleSetSaleYear(new Date().getFullYear());
   }, []);
 
+  // Initial Load Today
+  useEffect(() => {
+    if (salesType === 'Today') {
+      salesMonthState.reset();
+      salesYearState.reset();
+      createSalesDay({
+        start_date: dashboardOrderDay?.start_date ?? '',
+        end_date: dashboardOrderDay?.end_date ?? '',
+        productId: productId?.today,
+      });
+      createDashboardOrderSR({
+        type: 'Today',
+        singleDay: format(new Date(), 'yyyy-MM-dd'),
+      });
+    }
+  }, [salesType, productId?.today, dashboardOrderDay]);
+
+  // Initial Load Month
   useEffect(() => {
     if (!salesYear) return;
     if (salesType === 'Month') {
       salesYearState.reset();
-      createSalesMonth({ year: salesYear });
+      salesDayState.reset();
+      createSalesMonth({ year: salesYear, productId: productId?.month });
+      createDashboardOrderSR({
+        acroMonth: new Date().getMonth(),
+        type: 'Month',
+        year: new Date().getFullYear(),
+      });
     }
-  }, [salesYear, salesType]);
+  }, [salesYear, salesType, productId?.month]);
 
+  // Initial Load Year
   useEffect(() => {
-    if (salesType === 'Year' && yearRange) {
+    if (salesType === 'Year' && yearRange?.start_year && yearRange?.end_year) {
       salesMonthState.reset();
-      createSalesYear(yearRange);
+      salesDayState.reset();
+      createSalesYear({ ...yearRange, productId: productId?.year });
     }
-  }, [salesType, yearRange]);
+  }, [salesType, yearRange?.start_year, yearRange?.end_year, productId?.year]);
+
+  // On Collapse Filter Change
+  useEffect(() => {
+    if (salesType === 'Month') {
+      createDashboardOrderSR({
+        acroMonth: (router?.query?.v as string) ?? '',
+        type: 'Month',
+        year: salesYear ?? 0,
+        productId: dashboardOrdersMonth?.productId,
+      });
+    }
+    if (salesType === 'Year') {
+      createDashboardOrderSR({
+        type: 'Year',
+        year: +(router?.query?.v as string) || new Date().getFullYear(),
+        productId: dashboardOrdersYear?.productId,
+      });
+    }
+    if (salesType === 'Today') {
+      createDashboardOrderSR({
+        type: 'Today',
+        singleDay:
+          (router?.query?.v as string) ?? format(new Date(), 'yyyy-MM-dd'),
+        productId: dashboardOrderDay?.productId,
+      });
+    }
+  }, [
+    dashboardOrdersMonth?.productId,
+    dashboardOrdersYear?.productId,
+    dashboardOrderDay?.productId,
+    dashboardOrdersMonth?.year,
+    salesType,
+    router?.query?.v,
+    salesYear,
+  ]);
 
   return (
     <>
-      <SalesSettings
-        handleClose={modalToggle.handleClose}
-        isOpen={modalToggle.isOpen}
-        refetchReport={() => {
-          if (salesType === 'Month') {
-            salesYearState.reset();
-            createSalesMonth({ year: salesYear ?? 0 });
-          }
+      <Modal title="Sales Target" onClose={close} opened={opened}>
+        <SalesSettings
+          refetchReport={() => {
+            if (salesType === 'Month') {
+              salesYearState.reset();
+              createSalesMonth({ year: salesYear ?? 0 });
+            }
 
-          if (salesType === 'Year' && yearRange) {
-            salesMonthState.reset();
-            createSalesYear(yearRange);
-          }
-        }}
-      />
-      <div className="w-full pb-8">
-        <div className="flex items-stretch justify-end gap-4 mx-auto mb-3 pr-7">
-          <Card>
-            <h1>Total Products</h1>
-            {dashboardProduct.isLoading ? (
-              <Loading label="" />
-            ) : (
-              <h5 className="font-semibold">
-                {dashboardProduct?.data?.data?.productCount}
-              </h5>
-            )}
-          </Card>
-          <Card>
-            <h1>Total orders</h1>
-            {dashboardOrder.isLoading ? (
-              <Loading label="" />
-            ) : (
-              <h5 className="font-semibold">
-                {dashboardOrder?.data?.data?.orderCount}
-              </h5>
-            )}
-          </Card>
-          <Card>
-            <h1>Total Category</h1>
-            <h5 className="font-semibold">{PRODUCT_TYPE.length}</h5>
-          </Card>
-          <Card>
-            <h1>Total Sales</h1>
-            <PriceDisplay value={dashboardOrder?.data?.data?.totalSales} />
-          </Card>
-          <div className="flex justify-end items-center gap-2">
-            <div
-              onClick={handleToggle}
-              className="!text-black relative cursor-pointer"
+            if (salesType === 'Year' && yearRange) {
+              salesMonthState.reset();
+              createSalesYear(yearRange);
+            }
+          }}
+        />
+      </Modal>
+      <Tabs defaultValue="sales-report" variant="pills">
+        <Paper className="p-1">
+          <Tabs.List>
+            <Tabs.Tab
+              className="font-medium"
+              value="sales-report"
+              icon={<IconTrendingUp />}
             >
-              <IconFilter size={28} />
-              <SalesFilter handleClose={handleClose} isOpen={isOpen} />
-            </div>
-            <div
-              onClick={modalToggle.handleToggle}
-              className="!text-black relative cursor-pointer"
+              Sales Report
+            </Tabs.Tab>
+            <Tabs.Tab
+              className="font-medium"
+              value="product-performance"
+              icon={<IconGauge />}
             >
-              <IconSettings size={28} />
-            </div>
-          </div>
-        </div>
-        {salesMonthState.isLoading || salesYearState.isLoading ? (
-          <Loading label="Fetching Reports..." />
-        ) : (
-          <MainSaleGraph
-            data={salesMonthState?.data?.data || salesYearState?.data?.data}
-          />
-        )}
-        <div className="border my-4" />
-        {productPerformance.isLoading || productPerformance.isFetching ? (
-          <Loading label="Fetching Product Performance" />
-        ) : (
-          <ProductPerfGraph
-            data={productPerformance?.data?.data?.productPerformance ?? []}
-          />
-        )}
-        <div className="border my-4" />
-        {categoryPerformance.isLoading || categoryPerformance.isFetching ? (
-          <Loading label="Fetching Category Performance" />
-        ) : (
-          <CategoryPerfGraph
-            data={categoryPerformance?.data?.data?.categoryPerformance ?? []}
-          />
-        )}
-      </div>
+              Product Performance
+            </Tabs.Tab>
+            <Tabs.Tab
+              className="font-medium"
+              value="category-performance"
+              icon={<IconCategory2 />}
+            >
+              Category Performance
+            </Tabs.Tab>
+          </Tabs.List>
+        </Paper>
+        <Tabs.Panel value="sales-report" className="py-4 relative w-full">
+          <Group grow align="start">
+            <Paper radius="md" className="p-4">
+              <MainSaleGraph
+                data={
+                  salesMonthState?.data?.data ||
+                  salesYearState?.data?.data ||
+                  salesDayState?.data?.data
+                }
+                handleOpenSalesTarget={open}
+                loading={
+                  salesMonthState.isLoading ||
+                  salesYearState.isLoading ||
+                  salesDayState.isLoading ||
+                  salesDayState.isLoading
+                }
+                handleLineClick={handleLineClick}
+              />
+            </Paper>
+            <Group grow align="start">
+              <Paper radius="md" shadow="sm" className="p-3" pos="relative">
+                <LoadingOverlay visible={dashboardOrderState.isLoading} />
+                <Title order={4} color={colors.gray[8]}>
+                  Overall
+                </Title>
+                <Divider
+                  label={
+                    <Badge variant="filled">
+                      {dashboardOrderState?.data?.data?.date.label}
+                    </Badge>
+                  }
+                  className="my-2"
+                />
+                <div
+                  aria-label="Total Sales"
+                  className="flex gap-4 items-start flex-wrap"
+                >
+                  <Box>
+                    <Badge variant="dot">Total Sales</Badge>
+                    <Title className="flex items-center" order={2}>
+                      <PriceDisplay
+                        value={dashboardOrderState?.data?.data?.totalSales}
+                        fallback={
+                          <span className="text-base text-gray-500">
+                            No Current Sales
+                          </span>
+                        }
+                      />
+                    </Title>
+                  </Box>
+                  {!salesNotValid && (
+                    <Box>
+                      <Badge
+                        variant="light"
+                        color={
+                          dashboardOrderState?.data?.data?.isSalesGrow
+                            ? 'green'
+                            : 'red'
+                        }
+                      >
+                        Sales Growth %
+                      </Badge>
+                      <Title
+                        order={2}
+                        color={
+                          dashboardOrderState?.data?.data?.isSalesGrow
+                            ? 'green'
+                            : 'red'
+                        }
+                      >
+                        {dashboardOrderState?.data?.data?.growPercentage}%
+                        <span className="align-middle">
+                          {dashboardOrderState?.data?.data?.isSalesGrow ? (
+                            <IconTrendingUp />
+                          ) : (
+                            <IconTrendingDown />
+                          )}
+                        </span>
+                      </Title>
+                    </Box>
+                  )}
+                </div>
+                <Divider className="my-2" />
+                <div aria-label="Total Orders">
+                  <Badge variant="dot">Total Orders</Badge>
+                  <Title order={2}>
+                    {dashboardOrderState?.data?.data?.orderCount || (
+                      <span className="text-base text-gray-500">
+                        No Current Orders
+                      </span>
+                    )}
+                  </Title>
+                </div>
+              </Paper>
+              <Paper
+                aria-label="Best Selling Products"
+                radius="md"
+                shadow="sm"
+                className="p-4"
+                pos="relative"
+              >
+                <LoadingOverlay visible={dashboardOrderState.isLoading} />
+                <Title order={4} color={colors.gray[8]}>
+                  Best Selling Product
+                </Title>
+                <Divider
+                  label={
+                    <Badge variant="filled">
+                      {dashboardOrderState?.data?.data?.date.label}
+                    </Badge>
+                  }
+                  className="mb-4"
+                />
+                <ScrollArea.Autosize mah={400} p={4} offsetScrollbars>
+                  <div className="p-2">
+                    <Timeline
+                      bulletSize={18}
+                      lineWidth={1}
+                      active={999}
+                      color="blue"
+                    >
+                      {Object.entries(memoBestSellingProduct)
+                        .filter((item) => item[0] !== 'undefined')
+                        .sort(
+                          (a, b) => (b[1] as any).count - (a[1] as any).count
+                        )
+                        .map((item) => (
+                          <Timeline.Item
+                            className="text-sm"
+                            key={item[0]}
+                            title={<span className="font-bold">{item[0]}</span>}
+                            bulletSize={20}
+                          >
+                            <Paper
+                              shadow="sm"
+                              radius="sm"
+                              className="p-4"
+                              withBorder
+                            >
+                              <Text>
+                                Frequency:&nbsp;{(item[1] as any).count}
+                              </Text>
+                              <Text className="font-medium">
+                                Qty Sold:&nbsp;
+                                {(
+                                  item[1] as { totalSales: Order[] }
+                                ).totalSales?.reduce(
+                                  (prev, { quantity_sale }) =>
+                                    prev + quantity_sale,
+                                  0
+                                )}
+                              </Text>
+                              <Text className="font-medium flex items-center gap-1">
+                                Sales:&nbsp;
+                                <PriceDisplay
+                                  value={(
+                                    item[1] as { totalSales: Order[] }
+                                  ).totalSales?.reduce(
+                                    (prev, { sub_total }) => prev + sub_total,
+                                    0
+                                  )}
+                                />
+                                <Badge className="align-middlegn">
+                                  {(
+                                    ((
+                                      item[1] as { totalSales: Order[] }
+                                    ).totalSales?.reduce(
+                                      (prev, { sub_total }) => prev + sub_total,
+                                      0
+                                    ) /
+                                      dashboardOrderState?.data?.data
+                                        ?.totalSales!) *
+                                    100
+                                  ).toFixed(1)}
+                                  %
+                                </Badge>
+                              </Text>
+                            </Paper>
+                          </Timeline.Item>
+                        ))}
+                    </Timeline>
+                    {!Object.entries(memoBestSellingProduct).length && (
+                      <Title order={2}>
+                        {dashboardOrderState?.data?.data?.orderCount || (
+                          <span className="text-base text-gray-500">
+                            No Current Sales
+                          </span>
+                        )}
+                      </Title>
+                    )}
+                  </div>
+                </ScrollArea.Autosize>
+              </Paper>
+            </Group>
+          </Group>
+        </Tabs.Panel>
+        <Tabs.Panel value="product-performance" className="py-3">
+          {productPerformance.isLoading || productPerformance.isFetching ? (
+            <Loader />
+          ) : (
+            <Paper radius="md" className="p-4">
+              <ProductPerfGraph
+                data={productPerformance?.data?.data?.productPerformance ?? []}
+              />
+            </Paper>
+          )}
+        </Tabs.Panel>
+        <Tabs.Panel value="category-performance" className="py-3">
+          {categoryPerformance.isLoading || categoryPerformance.isFetching ? (
+            <Loader />
+          ) : (
+            <Paper radius="md" className="p-4">
+              <CategoryPerfGraph
+                data={
+                  categoryPerformance?.data?.data?.categoryPerformance ?? []
+                }
+              />
+            </Paper>
+          )}
+        </Tabs.Panel>
+      </Tabs>
     </>
   );
 };

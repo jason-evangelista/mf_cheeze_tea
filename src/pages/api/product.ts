@@ -69,9 +69,7 @@ const productApi = async (req: NextApiRequest, res: NextApiResponse) => {
       if (query.showAll === 'true' && !req.query.id) {
         const getAllProduct = await prismaClient.product.findMany({
           where: {
-            AND: {
-              status: 'ACTIVE',
-            },
+            status: 'ACTIVE',
           },
           ...(query.searchKey !== 'undefined' && {
             where: {

@@ -1,4 +1,5 @@
 import { Order, SalesTarget } from '@prisma/client';
+import { eachDayOfInterval, format } from 'date-fns';
 
 const calculateSalesByMonth = (
   month: Order[],
@@ -45,6 +46,37 @@ export const calculateSalesByYear = async (
   }, {});
 
   return divideItemByYear;
+};
+
+export const calculateSalesByDay = async (
+  orders: Order[],
+  startDate: Date,
+  endDate: Date
+) => {
+  const intervalDates = eachDayOfInterval({
+    start: startDate,
+    end: endDate,
+  }).map((item) => format(item, 'yyyy-MM-dd'));
+
+  const salesByDay = intervalDates.reduce((prev, date) => {
+    const findDayOverAllSales = orders
+      .filter((order) => format(order.order_date, 'yyyy-MM-dd').match(date))
+      .reduce((prev, { sub_total }) => prev + sub_total, 0);
+
+    const labelValue = format(new Date(date), 'MMM dd');
+    return {
+      ...prev,
+      [labelValue]: {
+        label: labelValue,
+        actual_sales: findDayOverAllSales,
+        date_value: format(new Date(date), 'yyyy-MM-dd'),
+      },
+    };
+  }, {});
+
+  console.log({ salesByDay });
+
+  return salesByDay;
 };
 
 export default calculateSalesByMonth;

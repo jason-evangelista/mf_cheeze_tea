@@ -1,3 +1,4 @@
+import { Loader, Table } from '@mantine/core';
 import {
   ColumnDef,
   flexRender,
@@ -5,7 +6,6 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { ReactNode } from 'react';
-import Loading from '../Loading';
 
 export type DataTableProps<ColumnShape> = {
   data?: ColumnShape[];
@@ -32,12 +32,16 @@ function DataTable<ColumnShape>({
   return (
     <div>
       {actions}
-      <table className="w-full border border-collapse text-sm">
+      <Table
+        className="w-full border-collapse text-sm"
+        verticalSpacing="xs"
+        highlightOnHover
+      >
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id} className="text-left">
               {headerGroup.headers.map((header) => (
-                <th key={header.id} className="p-3 border">
+                <th key={header.id} className="p-3">
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -62,13 +66,17 @@ function DataTable<ColumnShape>({
             ))}
           </tbody>
         )}
-      </table>
+      </Table>
       {!isLoading && !data?.length && (
         <div className="text-sm font-semibold text-gray-700 flex justify-center items-center my-4">
           No product data.
         </div>
       )}
-      {isLoading && <Loading label="Fetching product..." />}
+      {isLoading && (
+        <div className="flex justify-center items-center my-4">
+          <Loader size="md" />
+        </div>
+      )}
     </div>
   );
 }

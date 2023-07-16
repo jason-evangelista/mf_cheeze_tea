@@ -14,5 +14,6 @@ module.exports = {
       },
     },
   },
+  safelist: ['bg-[#1971c2]'],
   plugins: [],
-}
+};

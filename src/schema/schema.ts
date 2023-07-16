@@ -95,7 +95,7 @@ export const orderSchema = yup.object().shape({
   product_subtotal: yup
     .number()
     .transform((value) => (isNaN(value) ? 0 : value)),
-  product_order_date: yup.date().default(() => new Date()),
+  product_order_date: yup.string(),
 });
 
 export type GenerateAccountSchema = yup.InferType<typeof generateAccountSchema>;

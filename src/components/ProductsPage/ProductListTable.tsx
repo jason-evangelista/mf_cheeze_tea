@@ -9,7 +9,9 @@ import {
 import { Product } from '@prisma/client';
 import { createColumnHelper } from '@tanstack/react-table';
 import { useEffect, useMemo, useState } from 'react';
-import Button from '../common/Button';
+
+import { Button } from '@mantine/core';
+import { IconEdit, IconTrash } from '@tabler/icons-react';
 import DeleteModal from '../common/DeleteModal';
 import PriceDisplay from '../common/PriceDisplay';
 import DataTable from '../common/Tables/DataTable';
@@ -76,8 +78,7 @@ const ProductListTable = ({ handleGetProductInfo }: ProductListTableProps) => {
           return (
             <div className="flex items-center gap-2">
               <Button
-                btnTitle="Update"
-                className="bg-green-600 text-xs p-[5px]"
+                size="xs"
                 onClick={() => {
                   const {
                     fixed_amount,
@@ -96,10 +97,13 @@ const ProductListTable = ({ handleGetProductInfo }: ProductListTableProps) => {
                     id,
                   });
                 }}
-              />
+                color="green"
+                leftIcon={<IconEdit size={18} />}
+              >
+                Update
+              </Button>
               <Button
-                btnTitle="Delete"
-                className="bg-red-600 text-xs p-[5px]"
+                size="xs"
                 onClick={() => {
                   setProductDelete({
                     id: data.row.original.id,
@@ -107,7 +111,11 @@ const ProductListTable = ({ handleGetProductInfo }: ProductListTableProps) => {
                   });
                   handleToggle();
                 }}
-              />
+                color="red"
+                leftIcon={<IconTrash size={18} />}
+              >
+                Delete
+              </Button>
             </div>
           );
         },

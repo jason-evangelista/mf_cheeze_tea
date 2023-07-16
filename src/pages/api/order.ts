@@ -1,6 +1,7 @@
 import { OrderSchema } from '@/schema/schema';
 import { TableProps } from '@/types/TableProps';
 import { prismaClient } from '@/utils/prismaClient';
+import { add } from 'date-fns';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const orderApi = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -8,12 +9,13 @@ const orderApi = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
       const order = req.body as OrderSchema;
       const orderType = order?.product_order_type?.split(' ')[0];
-
       const addOrder = await prismaClient.order.create({
         data: {
           product_id: order?.product_id ?? '',
           base_amount: order?.product_base_price ?? 0,
-          order_date: order?.product_order_date,
+          order_date: add(new Date(order?.product_order_date ?? ''), {
+            days: 1,
+          }),
           order_type_size: orderType ?? '',
           quantity_sale: order?.product_quantity ?? 0,
           sub_total: order?.product_subtotal ?? 0,

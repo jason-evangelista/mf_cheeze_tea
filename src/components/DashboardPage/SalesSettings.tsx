@@ -1,41 +1,16 @@
 import { useCreateSalesTargetMutation } from '@/services/salesTargetService';
 import { SalesTargetBody } from '@/types/SalesTarget';
-import { useEffect, useRef, useState } from 'react';
-import ReactDropdown from 'react-dropdown';
-import { toast } from 'react-toastify';
-import { useOnClickOutside } from 'usehooks-ts';
-import Button from '../common/Button';
-import Input from '../common/Input';
-import Modal from '../common/Modal';
-
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
+import { Button, Divider, NumberInput } from '@mantine/core';
+import { MonthPickerInput, YearPickerInput } from '@mantine/dates';
+import { notifications } from '@mantine/notifications';
+import { format } from 'date-fns';
+import { useEffect, useState } from 'react';
 
 export type SalesSettingsProps = {
-  isOpen: boolean;
-  handleClose: VoidFunction;
   refetchReport: VoidFunction;
 };
 
-const SalesSettings = ({
-  isOpen,
-  handleClose,
-  refetchReport,
-}: SalesSettingsProps) => {
-  const menuRef = useRef<HTMLDivElement>(null);
-
+const SalesSettings = ({ refetchReport }: SalesSettingsProps) => {
   const [salesTarget, setSalesTarget] = useState<
     Partial<Omit<SalesTargetBody, 'type'>>
   >({});
@@ -49,19 +24,16 @@ const SalesSettings = ({
       sales_target: salesTarget?.sales_target ?? 0,
       type,
     });
-    handleClose();
   };
-
-  useOnClickOutside(menuRef, () => {
-    handleClose();
-  });
 
   useEffect(() => {
     if (salesTargetState.isSuccess) {
-      toast(salesTargetState?.data?.message, {
-        position: 'top-center',
-        type: 'success',
+      notifications.show({
+        title: 'Sales Target',
+        message: salesTargetState?.data?.message,
+        color: 'green',
       });
+
       setSalesTarget({
         month: undefined,
         sales_target: undefined,
@@ -69,117 +41,94 @@ const SalesSettings = ({
       });
       refetchReport();
     }
-  }, [salesTargetState]);
+  }, [salesTargetState.isSuccess]);
 
   return (
     <>
-      {isOpen && (
-        <Modal
-          isOpen={isOpen}
-          handleToggle={handleClose}
-          title="Sales Settings"
+      <div className="border-b my-3">
+        <h3 className="font-semibold text-sm m-0">Sales Target by Month</h3>
+        <div className="flex flex-col gap-1">
+          <MonthPickerInput
+            label="Select Month"
+            placeholder="Select Month"
+            onChange={(e) => {
+              const [month, year] = format(
+                new Date(e ?? new Date()),
+                'MMMM yyyy'
+              ).split(' ');
+
+              setSalesTarget({
+                ...salesTarget,
+                month,
+                year: +year,
+              });
+            }}
+          />
+          <NumberInput
+            label="Sales Target"
+            parser={(value) => value.replace(/₱\s?|(,*)/g, '')}
+            formatter={(value) =>
+              !Number.isNaN(parseFloat(value))
+                ? `₱ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',')
+                : '₱ '
+            }
+            onChange={(value) =>
+              setSalesTarget({
+                ...salesTarget,
+                sales_target: Number(value),
+              })
+            }
+          />
+        </div>
+        <Button
+          onClick={() => handleMutateSalesTarget('Month')}
+          size="sm"
+          loading={salesTargetState.isLoading}
+          className="my-2 w-full"
         >
-          <div className="border-b my-3">
-            <h3 className="font-semibold text-sm">Sales Target by Month</h3>
-            <div className="flex items-center gap-1">
-              <ReactDropdown
-                className="text-sm flex-1"
-                options={MONTHS}
-                onChange={(v) =>
-                  setSalesTarget({ ...salesTarget, month: v.value })
-                }
-              />
-              <Input
-                placeholder="Year"
-                className="text-sm flex-1"
-                type="number"
-                onChange={(e) =>
-                  setSalesTarget({
-                    ...salesTarget,
-                    year: Number(e?.currentTarget.value),
-                  })
-                }
-              />
-              <Input
-                placeholder="Sales Target"
-                className="text-sm flex-1"
-                type="number"
-                onChange={(e) =>
-                  setSalesTarget({
-                    ...salesTarget,
-                    sales_target: Number(e?.currentTarget?.value),
-                  })
-                }
-              />
-            </div>
-            <Button
-              onClick={() => handleMutateSalesTarget('Month')}
-              loading={salesTargetState.isLoading}
-              btnTitle="Set Month Sales Target"
-              className="bg-green-500 w-full text-xs font-semibold my-2"
-            />
-          </div>
-          <div className="border-b my-3">
-            <h3 className="font-semibold text-sm">Sales Target by Year</h3>
-            <div className="flex items-center gap-1">
-              <Input
-                placeholder="Year"
-                className="text-sm"
-                type="number"
-                onChange={(e) =>
-                  setSalesTarget({
-                    ...salesTarget,
-                    year: Number(e?.currentTarget.value),
-                  })
-                }
-              />
-              <Input
-                placeholder="Sales Target"
-                className="text-sm"
-                type="number"
-                onChange={(e) =>
-                  setSalesTarget({
-                    ...salesTarget,
-                    sales_target: Number(e?.currentTarget?.value),
-                  })
-                }
-              />
-            </div>
-            <Button
-              onClick={() => handleMutateSalesTarget('Year')}
-              loading={salesTargetState.isLoading}
-              btnTitle="Set Year Sales Target"
-              className="bg-green-500 w-full text-xs font-semibold my-2"
-            />
-          </div>
-          {/* <div className="flex items-start border-b gap-4">
-            <div className="my-3 flex-1">
-              <h3 className="font-semibold text-sm">Month Domain</h3>
-              <Input
-                placeholder="Max Value"
-                className="text-sm w-full"
-                type="number"
-              />
-              <Button
-                btnTitle="Set Month Domain"
-                className="bg-green-500 w-full text-xs font-semibold"
-              />
-            </div>
-            <div className="my-3 flex-1">
-              <h3 className="font-semibold text-sm">Year Domain</h3>
-              <Input
-                placeholder="Max Value"
-                className="text-sm w-full"
-                type="number"
-              />
-              <Button
-                btnTitle="Set Year Domain"
-                className="bg-green-500 w-full text-xs font-semibold"
-              />
-            </div>
-          </div> */}
-        </Modal>
-      )}
+          Set Month Sales Target
+        </Button>
+      </div>
+      <Divider />
+      <div className="border-b my-3">
+        <h3 className="font-semibold text-sm m-0">Sales Target by Year</h3>
+        <div className="flex flex-col gap-1">
+          <YearPickerInput
+            label="Select Year"
+            placeholder="Select Year"
+            onChange={(e) => {
+              console.log(e?.getFullYear());
+              setSalesTarget({
+                ...salesTarget,
+                year: e?.getFullYear(),
+              });
+            }}
+          />
+          <NumberInput
+            label="Sales Target"
+            parser={(value) => value.replace(/₱\s?|(,*)/g, '')}
+            formatter={(value) =>
+              !Number.isNaN(parseFloat(value))
+                ? `₱ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',')
+                : '₱ '
+            }
+            onChange={(value) => {
+              setSalesTarget({
+                ...salesTarget,
+                sales_target: Number(value),
+              });
+            }}
+          />
+        </div>
+        <Button
+          onClick={() => handleMutateSalesTarget('Year')}
+          size="sm"
+          loading={salesTargetState.isLoading}
+          className="my-2 w-full"
+        >
+          Set Year Sales Target
+        </Button>
+      </div>
     </>
   );
 };

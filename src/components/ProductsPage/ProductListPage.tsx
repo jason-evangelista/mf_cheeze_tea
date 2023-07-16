@@ -1,17 +1,20 @@
-import useToggleContainer from '@/hooks/useToggleContainer';
 import { ProductSchema } from '@/schema/schema';
-import { useEffect, useMemo, useState } from 'react';
-import Button from '../common/Button';
+import { Button, Modal, Paper } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { IconPlus } from '@tabler/icons-react';
+import { useMemo, useState } from 'react';
 import ProductForm from './ProductForm';
 import ProductListTable from './ProductListTable';
 
 const ProductListPage = () => {
-  const { handleClose, handleToggle, isOpen } = useToggleContainer();
   const [productInfo, setProductInfo] = useState<
     ProductSchema & { id: string }
   >();
+  const [opened, { close, open }] = useDisclosure(false);
+
   const handleGetProductInfo = (payload: ProductSchema & { id: string }) => {
     setProductInfo(payload);
+    open();
   };
 
   const removeProductInfoOnClose = () => {
@@ -27,29 +30,37 @@ const ProductListPage = () => {
 
   const memoProductInfo = useMemo(() => productInfo, [productInfo]);
 
-  useEffect(() => {
-    if (!productInfo) return;
-    handleToggle();
-  }, [productInfo]);
-
   return (
-    <div>
-      <ProductForm
-        handleToggle={handleToggle}
-        isOpen={isOpen}
-        handleClose={handleClose}
-        initialValue={memoProductInfo}
-        removeProdInfoOnClose={removeProductInfoOnClose}
-      />
-      <div className="w-full flex justify-end my-2">
-        <Button
-          btnTitle="Add Product"
-          onClick={handleToggle}
-          className="bg-green-600 text-xs"
+    <>
+      <Modal
+        title="Product"
+        opened={opened}
+        onClose={() => {
+          close();
+          removeProductInfoOnClose();
+        }}
+      >
+        <ProductForm
+          handleClose={close}
+          isOpen={opened}
+          initialValue={memoProductInfo}
+          removeProdInfoOnClose={removeProductInfoOnClose}
         />
-      </div>
-      <ProductListTable handleGetProductInfo={handleGetProductInfo} />
-    </div>
+      </Modal>
+      <Paper radius="md" className="p-4">
+        <div className="w-full flex justify-end my-2">
+          <Button
+            onClick={open}
+            color="green"
+            leftIcon={<IconPlus />}
+            size="sm"
+          >
+            Add Product
+          </Button>
+        </div>
+        <ProductListTable handleGetProductInfo={handleGetProductInfo} />
+      </Paper>
+    </>
   );
 };
 

@@ -6,7 +6,11 @@ import { NextApiRequest, NextApiResponse } from 'next';
 const salesYearApi = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'POST') {
-      const body = req.body as { start_year: number; end_year: number };
+      const body = req.body as {
+        start_year: number;
+        end_year: number;
+        productId: string;
+      };
       const startDate = transformSalesMonth(body.start_year);
       const endDate = transformSalesMonth(body.end_year);
 
@@ -18,10 +22,14 @@ const salesYearApi = async (req: NextApiRequest, res: NextApiResponse) => {
 
       const getSpanYear = await prismaClient.order.findMany({
         where: {
+          status: 'ACTIVE',
           order_date: {
             gte: parseDate(startDate.Jan.start),
             lte: parseDate(endDate.Dec.end),
           },
+          ...(body?.productId && {
+            product_id: body?.productId,
+          }),
         },
       });
 

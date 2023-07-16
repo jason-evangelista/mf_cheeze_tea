@@ -5,22 +5,22 @@ import {
   useGetProductQuery,
 } from '@/services/productService';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { Button } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { DayPicker } from 'react-day-picker';
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-toastify';
 import { useDebounce } from 'usehooks-ts';
-import Button from '../common/Button';
 import EditableSelect, { OptionItem } from '../common/EditableSelect';
 import Input from '../common/Input';
 import Loading from '../common/Loading';
-import Modal from '../common/Modal';
 import OrderComputation from './OrderComputation';
 
 export type OrderFormProps = {
   isOpen: boolean;
   handleToggle: VoidFunction;
   handleClose: VoidFunction;
+  handleisProductSelected: () => void;
 };
 
 const initialValue: OrderSchema = {
@@ -29,10 +29,13 @@ const initialValue: OrderSchema = {
   product_order_type: undefined,
   product_quantity: undefined,
   product_subtotal: undefined,
-  product_order_date: new Date(),
+  product_order_date: new Date().toISOString(),
 };
 
-const OrderForm = ({ handleToggle, isOpen, handleClose }: OrderFormProps) => {
+const OrderForm = ({
+  handleClose,
+  handleisProductSelected,
+}: OrderFormProps) => {
   const {
     register,
     setValue,
@@ -133,6 +136,7 @@ const OrderForm = ({ handleToggle, isOpen, handleClose }: OrderFormProps) => {
   useEffect(() => {
     if (!debounceProductId) return;
     setValue('product_id', oneProductQuery?.data?.data?.product?.id ?? '');
+    handleisProductSelected();
   }, [oneProductQuery?.data?.data]);
 
   useEffect(() => {
@@ -183,150 +187,155 @@ const OrderForm = ({ handleToggle, isOpen, handleClose }: OrderFormProps) => {
         type: 'value',
       });
     }
-    await addOrder(payload).unwrap();
+    return addOrder({
+      ...payload,
+    });
   };
 
   useEffect(() => {
     if (addOrderState.isSuccess) {
-      toast(addOrderState?.data?.message, {
-        type: 'success',
-        position: 'top-center',
+      notifications.show({
+        message: addOrderState?.data?.message,
+        color: 'green',
       });
+
       reset(initialValue);
       handleClose();
     }
 
     if (addOrderState.isError) {
-      toast(addOrderState?.data?.message, {
-        type: 'error',
-        position: 'top-center',
+      notifications.show({
+        message: addOrderState?.data?.message,
+        color: 'red',
       });
     }
-
-    return () => {
-      reset(initialValue);
-    };
   }, [addOrderState, reset]);
 
   return (
-    <Modal title="Add Order" isOpen={isOpen} handleToggle={handleToggle}>
-      <form onSubmit={handleSubmit(handleCreateOrder)}>
-        <EditableSelect
-          label="Select Product"
-          value={selectedValue?.label}
-          className="text-sm"
-          data={memoProduct}
-          onItemClick={onItemClick}
-          onChange={(e) => onInputChange(e)}
-          activeselecteditem={selectedValue?.value ?? ''}
-          loading={isLoading}
-        />
+    <form onSubmit={handleSubmit(handleCreateOrder)}>
+      <EditableSelect
+        label="Select Product"
+        value={selectedValue?.label}
+        className="text-sm"
+        data={memoProduct}
+        onItemClick={onItemClick}
+        onChange={(e) => onInputChange(e)}
+        activeselecteditem={selectedValue?.value ?? ''}
+        loading={isLoading}
+      />
 
-        <div className="border-t mt-4">
-          {(doesHaveSizes || isFixedPrice) && (
-            <h3 className="font-semibold text-sm py-2">Options</h3>
-          )}
+      <div className="border-t mt-4">
+        {(doesHaveSizes || isFixedPrice) && (
+          <h3 className="font-semibold text-sm py-2">Options</h3>
+        )}
 
-          {(oneProductQuery.isLoading || oneProductQuery.isFetching) && (
-            <Loading label="Fetching product option" />
-          )}
-          {!oneProductQuery?.data?.data?.product && (
-            <h3 className="font-semibold text-xs text-center py-2 text-gray-400">
-              Select product to check options
-            </h3>
-          )}
-          {oneProductQuery?.data?.data?.product && (
-            <>
-              {doesHaveSizes && (
-                <div>
-                  <label className="font-semibold text-sm block">
-                    Select Size
-                  </label>
-                  <select
-                    disabled={addOrderState.isLoading}
-                    placeholder="Select Size"
-                    className="w-full border py-2 text-sm"
-                    {...register('product_order_type')}
-                  >
-                    {mapSizes.map((item, idx) => (
-                      <option key={idx} value={`${item.size} ${item.value}`}>
-                        {item.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {!!isFixedPrice && (
-                <Input
-                  labelTitle="Fixed Amount"
-                  defaultValue={`₱${watchBasePrice || isFixedPrice}`}
-                  disabled
-                  className="text-sm w-full"
-                />
-              )}
-
-              <Input
-                placeholder="Quantity"
-                labelTitle="Quantity"
-                type="number"
-                min={1}
-                defaultValue={1}
-                className="text-sm w-full"
-                {...register('product_quantity')}
-                inputMode="decimal"
-                disabled={addOrderState.isLoading}
-                errorMessage={errors?.product_quantity?.message}
-              />
+        {(oneProductQuery.isLoading || oneProductQuery.isFetching) && (
+          <Loading label="Fetching product option" />
+        )}
+        {!oneProductQuery?.data?.data?.product && (
+          <h3 className="font-semibold text-xs text-center py-2 text-gray-400">
+            Select product to check options
+          </h3>
+        )}
+        {oneProductQuery?.data?.data?.product && (
+          <>
+            {doesHaveSizes && (
               <div>
-                <h3 className="font-semibold text-sm">Order Date</h3>
-                <DayPicker
-                  disableNavigation={addOrderState.isLoading}
-                  onSelect={(e) => setValue('product_order_date', new Date(e!))}
-                  selected={watchProductOrderDate}
-                  mode="single"
-                  disabled={[{ before: new Date() }]}
-                  className="text-sm !m-0"
-                  modifiersStyles={{
-                    selected: {
-                      background: '#22c55e',
-                    },
-                  }}
-                  styles={{
-                    table: {
-                      width: '100%',
-                      maxWidth: 'unset',
-                    },
-                    months: {
-                      display: 'block',
-                    },
-                  }}
-                />
+                <label className="font-semibold text-sm block">
+                  Select Size
+                </label>
+                <select
+                  disabled={addOrderState.isLoading}
+                  placeholder="Select Size"
+                  className="w-full border py-2 text-sm"
+                  {...register('product_order_type')}
+                >
+                  {mapSizes.map((item, idx) => (
+                    <option key={idx} value={`${item.size} ${item.value}`}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <OrderComputation
-                basePrice={watchBasePrice}
-                productName={debounceSearchKey}
-                subTotal={watchSubTotal}
-                qty={watchQuantity}
-              />
+            )}
 
-              {(doesHaveSizes || isFixedPrice) && (
-                <Button
-                  disabled={
-                    oneProductQuery.isLoading ||
-                    oneProductQuery.isFetching ||
-                    addOrderState.isLoading
-                  }
-                  loading={addOrderState.isLoading}
-                  btnTitle="Create Order"
-                  className="w-full bg-green-500 text-sm mt-3"
-                />
-              )}
-            </>
-          )}
-        </div>
-      </form>
-    </Modal>
+            {!!isFixedPrice && (
+              <Input
+                labelTitle="Fixed Amount"
+                defaultValue={`₱${watchBasePrice || isFixedPrice}`}
+                disabled
+                className="text-sm w-full"
+              />
+            )}
+
+            <Input
+              placeholder="Quantity"
+              labelTitle="Quantity"
+              type="number"
+              min={1}
+              defaultValue={1}
+              className="text-sm w-full"
+              {...register('product_quantity')}
+              inputMode="decimal"
+              disabled={addOrderState.isLoading}
+              errorMessage={errors?.product_quantity?.message}
+            />
+            <div>
+              <h3 className="font-semibold text-sm">Order Date</h3>
+              <DayPicker
+                disableNavigation={addOrderState.isLoading}
+                onSelect={(e) => {
+                  if (!e) return;
+                  console.log(e);
+                  setValue('product_order_date', e.toISOString());
+                }}
+                selected={new Date(watchProductOrderDate)}
+                mode="single"
+                disabled={[{ before: new Date() }]}
+                className="text-sm !m-0"
+                modifiersStyles={{
+                  selected: {
+                    background: '#22c55e',
+                  },
+                }}
+                styles={{
+                  table: {
+                    width: '100%',
+                    maxWidth: 'unset',
+                  },
+                  months: {
+                    display: 'block',
+                  },
+                }}
+              />
+            </div>
+            <OrderComputation
+              basePrice={watchBasePrice}
+              productName={debounceSearchKey}
+              subTotal={watchSubTotal}
+              qty={watchQuantity}
+            />
+
+            {(doesHaveSizes || isFixedPrice) && (
+              <Button
+                type="submit"
+                disabled={
+                  oneProductQuery.isLoading ||
+                  oneProductQuery.isFetching ||
+                  addOrderState.isLoading
+                }
+                loading={addOrderState.isLoading}
+                color="green"
+                size="sm"
+                className="w-full mt-3"
+              >
+                Create Order
+              </Button>
+            )}
+          </>
+        )}
+      </div>
+    </form>
   );
 };
 

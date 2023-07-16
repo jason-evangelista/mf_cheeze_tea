@@ -6,27 +6,21 @@ import {
 } from '@/services/productService';
 import { parseErrorResponse } from '@/utils/parseErrorResponse';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { Button, Select, TextInput } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import { memo, useEffect } from 'react';
-import Dropdown from 'react-dropdown';
 import { Controller, useForm } from 'react-hook-form';
-import { toast } from 'react-toastify';
-import Button from '../common/Button';
-import Input from '../common/Input';
-import Modal from '../common/Modal';
 
 export type ProductFormProps = {
   isOpen: boolean;
-  handleToggle: () => void;
-  handleClose: () => void;
   initialValue?: ProductSchema & { id: string };
+  handleClose: () => void;
   removeProdInfoOnClose: VoidFunction;
 };
 const ProductForm = ({
   isOpen,
-  handleToggle,
   handleClose,
   initialValue,
-  removeProdInfoOnClose,
 }: ProductFormProps) => {
   const {
     register,
@@ -85,9 +79,10 @@ const ProductForm = ({
   // Add product effect
   useEffect(() => {
     if (addProductState.isSuccess) {
-      toast(addProductState?.data?.message, {
-        type: 'success',
-        position: 'top-center',
+      notifications.show({
+        title: 'Product',
+        message: addProductState?.data?.message,
+        color: 'green',
       });
       reset();
       handleClose();
@@ -100,9 +95,10 @@ const ProductForm = ({
   // Update Product Effect
   useEffect(() => {
     if (updateProductState.isSuccess) {
-      toast(updateProductState?.data?.message, {
-        type: 'success',
-        position: 'top-center',
+      notifications.show({
+        title: 'Product',
+        message: updateProductState?.data?.message,
+        color: 'green',
       });
       reset();
       handleClose();
@@ -113,72 +109,66 @@ const ProductForm = ({
   }, [updateProductState]);
 
   return (
-    <Modal
-      title="Products"
-      isOpen={isOpen}
-      handleToggle={() => {
-        handleToggle;
-        removeProdInfoOnClose();
-      }}
+    <form
+      onSubmit={handleSubmit(handleMutateProduct)}
+      className="flex flex-col gap-2"
     >
-      <form onSubmit={handleSubmit(handleMutateProduct)}>
-        <Input
-          placeholder="Product Name"
-          className="text-sm w-full"
-          labelTitle="Product Name"
-          {...register('product_name')}
-          errorMessage={errors?.product_name?.message}
-        />
-        <Input
-          placeholder="00.00"
-          className="text-sm w-full"
-          labelTitle="Large Size Amount (If Applicable)"
-          type="number"
-          {...register('large_size_amount')}
-          errorMessage={errors?.large_size_amount?.message}
-        />
-        <Input
-          placeholder="00.00"
-          className="text-sm w-full"
-          labelTitle="Regular Size Amount (If Applicable)"
-          type="number"
-          {...register('regular_size_amount')}
-          errorMessage={errors?.regular_size_amount?.message}
-        />
-        <Input
-          placeholder="00.00"
-          className="text-sm w-full"
-          labelTitle="Fixed Amount (If Applicable)"
-          type="number"
-          {...register('fixed_amount')}
-          errorMessage={errors?.fixed_amount?.message}
-        />
-        <div>
-          <p className="text-sm font-medium">Product Type</p>
-          <Controller
-            name="product_type"
-            control={control}
-            defaultValue={productType[0].value}
-            render={({ field: { onChange, value, ref } }) => (
-              <Dropdown
-                ref={ref}
-                value={value}
-                onChange={(val) => onChange(val.value)}
-                controlClassName="!border"
-                className="text-sm"
-                options={productType}
-                placeholder="Select product type"
+      <TextInput
+        placeholder="Product Name"
+        label="Product Name"
+        {...register('product_name')}
+        error={errors?.product_name?.message}
+      />
+      <TextInput
+        placeholder="00.00"
+        label="Large Size Amount (If Applicable)"
+        type="number"
+        {...register('large_size_amount')}
+        error={errors?.large_size_amount?.message}
+      />
+      <TextInput
+        placeholder="00.00"
+        label="Regular Size Amount (If Applicable)"
+        type="number"
+        {...register('regular_size_amount')}
+        error={errors?.regular_size_amount?.message}
+      />
+      <TextInput
+        placeholder="00.00"
+        label="Fixed Amount (If Applicable)"
+        type="number"
+        {...register('fixed_amount')}
+        error={errors?.fixed_amount?.message}
+      />
+      <div>
+        <p className="text-sm font-medium">Product Type</p>
+        <Controller
+          name="product_type"
+          control={control}
+          defaultValue={productType[0].value}
+          render={({ field }) => (
+            <>
+              <Select
+                data={productType}
+                placeholder="Select Product Type"
+                {...field}
               />
-            )}
-          />
-        </div>
-        <Button
-          btnTitle="Save Product"
-          className="bg-green-500 text-xs mt-3 w-full"
-          loading={addProductState.isLoading || updateProductState.isLoading}
+            </>
+          )}
         />
-      </form>
-    </Modal>
+      </div>
+
+      <Button
+        type="submit"
+        w="100%"
+        size="xs"
+        color="green"
+        className="mt-3"
+        loading={addProductState.isLoading || updateProductState.isLoading}
+      >
+        Save Product
+      </Button>
+    </form>
   );
 };
 
