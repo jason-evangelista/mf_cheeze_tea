@@ -79,6 +79,16 @@ model GraphDomain {
   @@map("graph_domains")
 }
 
+model ProductCategory {
+  id         String   @id @default(cuid())
+  name       String   @unique
+  code       String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("product_categorys")
+}
+
 enum ProductType {
   CHEEZE_TEA
   MILK_TEA

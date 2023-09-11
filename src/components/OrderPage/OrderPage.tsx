@@ -2,6 +2,7 @@ import useToggleContainer from '@/hooks/useToggleContainer';
 import { Button, Modal, Paper } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconPlus } from '@tabler/icons-react';
+import Link from 'next/link';
 import { useState } from 'react';
 import OrderForm from './OrderForm';
 import OrderListTable from './OrderListTable';
@@ -9,7 +10,7 @@ import OrderListTable from './OrderListTable';
 const OrderPage = () => {
   const [isProductSelected, setIsProductSelected] = useState(false);
   const { isOpen, handleToggle } = useToggleContainer();
-  const [opened, { close, open }] = useDisclosure(false);
+  const [opened, { close }] = useDisclosure(false);
 
   const handleIsProductSelected = () => {
     setIsProductSelected(true);
@@ -38,7 +39,7 @@ const OrderPage = () => {
         />
       </Modal>
       <div className="flex justify-end">
-        <Button
+        {/* <Button
           size="xs"
           color="green"
           className=" my-2"
@@ -46,7 +47,17 @@ const OrderPage = () => {
           leftIcon={<IconPlus />}
         >
           Add Order
-        </Button>
+        </Button> */}
+        <Link href="/create-order">
+          <Button
+            size="xs"
+            color="green"
+            className=" my-2"
+            leftIcon={<IconPlus />}
+          >
+            Add Order
+          </Button>
+        </Link>
       </div>
       <OrderListTable />
     </Paper>

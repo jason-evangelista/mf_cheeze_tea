@@ -14,6 +14,7 @@
     "@emotion/react": "^11.11.1",
     "@emotion/server": "^11.11.0",
     "@hookform/resolvers": "^3.1.1",
+    "@mantine/carousel": "^6.0.17",
     "@mantine/core": "^6.0.16",
     "@mantine/dates": "^6.0.16",
     "@mantine/hooks": "^6.0.16",
@@ -25,7 +26,7 @@
     "@reduxjs/toolkit": "^1.9.5",
     "@tabler/icons-react": "^2.22.0",
     "@tanstack/react-table": "^8.9.2",
-    "@types/node": "^20.3.1",
+    "@types/node": "^20.4.4",
     "@types/react": "18.2.12",
     "@types/react-dom": "18.2.5",
     "autoprefixer": "10.4.14",
@@ -33,6 +34,7 @@
     "clsx": "^1.2.1",
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.9",
+    "embla-carousel-react": "^8.0.0-rc11",
     "eslint": "8.42.0",
     "eslint-config-next": "13.4.6",
     "js-cookie": "^3.0.5",
@@ -61,7 +63,8 @@
     "@types/jsonwebtoken": "^9.0.2",
     "@types/qs": "^6.9.7",
     "eslint-plugin-react-hooks": "^5.0.0-canary-613e6f5fc-20230616",
-    "typescript": "5.0.4"
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"

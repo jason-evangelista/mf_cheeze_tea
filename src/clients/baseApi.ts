@@ -37,6 +37,7 @@ const tagTypes: string[] = [
   'Order',
   'Sale',
   'Sales Target',
+  'Product Category',
   'Product Performance',
   'Category Performance',
 ];
