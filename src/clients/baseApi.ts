@@ -40,6 +40,7 @@ const tagTypes: string[] = [
   'Product Category',
   'Product Performance',
   'Category Performance',
+  'Multiple Order',
 ];
 
 const baseApi = createApi({

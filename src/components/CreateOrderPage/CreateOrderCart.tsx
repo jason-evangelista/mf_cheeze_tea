@@ -1,4 +1,5 @@
 import { productType } from '@/constants/productType';
+import { useCreateMultipleOrdersMutation } from '@/services/createOrderService';
 import {
   Button,
   Divider,
@@ -8,14 +9,16 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { IconCash, IconShoppingCart } from '@tabler/icons-react';
-import Link from 'next/link';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import PriceDisplay from '../common/PriceDisplay';
 import {
   CreateOrderContext,
   CreateOrderContextProps,
   OrderCart,
 } from './CreateOrderContextProvider';
+
+import { notifications } from '@mantine/notifications';
+import { useRouter } from 'next/router';
 import ProductOrderModal from './ProductOrderModal';
 
 type CreateOrderCartProps = {
@@ -23,8 +26,30 @@ type CreateOrderCartProps = {
 } & Omit<Partial<CreateOrderContextProps>, 'orderCart'>;
 
 const CreateOrderCart = ({ orderCart, ...rest }: CreateOrderCartProps) => {
+  const router = useRouter();
   const { colors } = useMantineTheme();
   const { overAllTotal } = useContext(CreateOrderContext);
+  const [createOrderMultiple, createOrderMultipleState] =
+    useCreateMultipleOrdersMutation();
+
+  const handleSubmitMultipleOrder = async () => {
+    if (!orderCart.length) return;
+    console.log(orderCart);
+    createOrderMultiple({
+      orderCart,
+    });
+  };
+
+  useEffect(() => {
+    if (createOrderMultipleState.isSuccess) {
+      notifications.show({
+        title: 'Order Complete!',
+        message: createOrderMultipleState?.data?.message,
+        color: 'green',
+      });
+      router.replace('/orders');
+    }
+  }, [createOrderMultipleState]);
 
   return (
     <>
@@ -70,10 +95,14 @@ const CreateOrderCart = ({ orderCart, ...rest }: CreateOrderCartProps) => {
               <PriceDisplay value={overAllTotal} />
             </Title>
             <Divider />
-            {/* TODO: saving data to database */}
-            <Link href="/dashboard">
-              <Button component='a' fullWidth>Submit order</Button>
-            </Link>
+            <Button
+              disabled={!overAllTotal || createOrderMultipleState?.isSuccess}
+              fullWidth
+              onClick={handleSubmitMultipleOrder}
+              loading={createOrderMultipleState.isLoading}
+            >
+              Submit order
+            </Button>
           </Stack>
         </Paper>
       ) : null}
