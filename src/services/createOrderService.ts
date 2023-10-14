@@ -1,4 +1,5 @@
 import baseApi from '@/clients/baseApi';
+import { PaymentDetailsParams } from '@/components/CreateOrderPage/CreateOrderCart';
 import { OrderCart } from '@/components/CreateOrderPage/CreateOrderContextProvider';
 import { BaseSuccessResponse } from '@/types/BaseApiResponse';
 
@@ -8,7 +9,7 @@ const createOrderApiService = baseApi.injectEndpoints({
       BaseSuccessResponse<{
         snapshotOrderCart: OrderCart[];
       }>,
-      { orderCart: OrderCart[] }
+      { orderCart: OrderCart[] } & PaymentDetailsParams
     >({
       query: (body) => ({
         url: '/create-order',

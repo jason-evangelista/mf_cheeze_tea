@@ -40,7 +40,7 @@ const SignIn = () => {
   return (
     <>
       <Head>
-        <title>Sign in</title>
+        <title>Sign in | MF Cheeze tea</title>
       </Head>
       <div className="flex items-center justify-center h-screen">
         <form onSubmit={handleSubmit(handleSignIn)}>

@@ -3,8 +3,10 @@ import { useCreateMultipleOrdersMutation } from '@/services/createOrderService';
 import {
   Button,
   Divider,
+  Modal,
   Paper,
   Stack,
+  Text,
   Title,
   useMantineTheme,
 } from '@mantine/core';
@@ -17,13 +19,22 @@ import {
   OrderCart,
 } from './CreateOrderContextProvider';
 
+import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/router';
+import CreateOrderConfirmModal from './CreateOrderPaymentDetails';
 import ProductOrderModal from './ProductOrderModal';
 
 type CreateOrderCartProps = {
   orderCart: OrderCart[];
 } & Omit<Partial<CreateOrderContextProps>, 'orderCart'>;
+
+export type PaymentDetailsParams = {
+  payment: number;
+  change: number;
+  customerName?: string;
+  totalAmount: number;
+};
 
 const CreateOrderCart = ({ orderCart, ...rest }: CreateOrderCartProps) => {
   const router = useRouter();
@@ -32,11 +43,16 @@ const CreateOrderCart = ({ orderCart, ...rest }: CreateOrderCartProps) => {
   const [createOrderMultiple, createOrderMultipleState] =
     useCreateMultipleOrdersMutation();
 
-  const handleSubmitMultipleOrder = async () => {
+  const [opened, { close, open }] = useDisclosure(false);
+
+  const handleSubmitMultipleOrder = async (
+    paymentDetails: PaymentDetailsParams
+  ) => {
     if (!orderCart.length) return;
-    console.log(orderCart);
+
     createOrderMultiple({
       orderCart,
+      ...paymentDetails,
     });
   };
 
@@ -47,12 +63,28 @@ const CreateOrderCart = ({ orderCart, ...rest }: CreateOrderCartProps) => {
         message: createOrderMultipleState?.data?.message,
         color: 'green',
       });
+      close();
       router.replace('/orders');
     }
   }, [createOrderMultipleState]);
 
   return (
     <>
+      <Modal
+        opened={opened}
+        onClose={close}
+        title={
+          <div>
+            <Text fw="bold">Order Payment Details</Text>
+          </div>
+        }
+      >
+        <CreateOrderConfirmModal
+          totalAmount={overAllTotal ?? 0}
+          loading={createOrderMultipleState.isLoading}
+          handleSubmitOrder={handleSubmitMultipleOrder}
+        />
+      </Modal>
       <Paper withBorder className="overflow-hidden" p="sm">
         <Title order={3} className="flex items-center gap-1">
           <IconShoppingCart size={32} color={colors.yellow[7]} />
@@ -98,7 +130,7 @@ const CreateOrderCart = ({ orderCart, ...rest }: CreateOrderCartProps) => {
             <Button
               disabled={!overAllTotal || createOrderMultipleState?.isSuccess}
               fullWidth
-              onClick={handleSubmitMultipleOrder}
+              onClick={open}
               loading={createOrderMultipleState.isLoading}
             >
               Submit order

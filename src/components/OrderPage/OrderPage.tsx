@@ -1,11 +1,12 @@
 import useToggleContainer from '@/hooks/useToggleContainer';
-import { Button, Modal, Paper } from '@mantine/core';
+import { Button, Modal, Paper, Tabs, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconPlus } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import OrderForm from './OrderForm';
 import OrderListTable from './OrderListTable';
+import OrderSnapshotListTable from './OrderSnapshotListTable';
 
 const OrderPage = () => {
   const [isProductSelected, setIsProductSelected] = useState(false);
@@ -59,7 +60,22 @@ const OrderPage = () => {
           </Button>
         </Link>
       </div>
-      <OrderListTable />
+      <Tabs defaultValue="group-order">
+        <Tabs.List>
+          <Tabs.Tab value="group-order">
+            <Text fw="bold">Group Order</Text>
+          </Tabs.Tab>
+          <Tabs.Tab value="single-record">
+            <Text fw="bold">Order Product</Text>
+          </Tabs.Tab>
+        </Tabs.List>
+        <Tabs.Panel value="group-order">
+          <OrderSnapshotListTable />
+        </Tabs.Panel>
+        <Tabs.Panel value="single-record">
+          <OrderListTable />
+        </Tabs.Panel>
+      </Tabs>
     </Paper>
   );
 };

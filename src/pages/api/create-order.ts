@@ -1,3 +1,4 @@
+import { PaymentDetailsParams } from '@/components/CreateOrderPage/CreateOrderCart';
 import { OrderCart } from '@/components/CreateOrderPage/CreateOrderContextProvider';
 import { prismaClient } from '@/utils/prismaClient';
 import { Order } from '@prisma/client';
@@ -5,14 +6,16 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 type BodyResponse = {
   orderCart: OrderCart[];
-};
+} & PaymentDetailsParams;
 
 type ModOrder = Omit<Order, 'created_at' | 'status' | 'id' | 'updated_at'>;
 
 const createOrderApi = async (req: NextApiRequest, res: NextApiResponse) => {
+  console.log(req.body);
   try {
     if (req.method === 'POST') {
-      const { orderCart } = req.body as BodyResponse;
+      const { orderCart, change, payment, totalAmount, customerName } =
+        req.body as BodyResponse;
 
       const parseOrder = orderCart.reduce((prev, item) => {
         let _orderCart: ModOrder[] = [];
@@ -59,6 +62,16 @@ const createOrderApi = async (req: NextApiRequest, res: NextApiResponse) => {
 
       const createManyOrder = await prismaClient.order.createMany({
         data: parseOrder,
+      });
+
+      await prismaClient.orderSnapshot.create({
+        data: {
+          snapshot_record: JSON.stringify(orderCart),
+          change,
+          payment,
+          customer_name: customerName ?? '',
+          total_amount: totalAmount,
+        },
       });
 
       if (createManyOrder)

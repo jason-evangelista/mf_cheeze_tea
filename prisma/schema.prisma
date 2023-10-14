@@ -56,6 +56,20 @@ model Order {
   @@map("orders")
 }
 
+model OrderSnapshot {
+  id              String   @id @default(cuid())
+  snapshot_record String   @db.Text
+  customer_name   String
+  total_amount    Int
+  payment         Int
+  change          Int
+  status          Status   @default(ACTIVE)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  @@map("order_snapshots")
+}
+
 model SalesTarget {
   id         String          @id @default(cuid())
   month      String?
