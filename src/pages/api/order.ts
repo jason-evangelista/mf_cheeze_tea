@@ -68,7 +68,7 @@ const orderApi = async (req: NextApiRequest, res: NextApiResponse) => {
             status: 'ACTIVE',
           },
           orderBy: {
-            order_date: 'desc',
+            created_at: 'desc',
           },
           ...(+query.currentPage > 1 && {
             skip: +query.skip * (+query.currentPage - 1),

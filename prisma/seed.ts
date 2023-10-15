@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 (async () => {
-  await prisma.product.createMany({
+  /*  await prisma.product.createMany({
     data: [
       {
         name: 'Green Tea Cheeze',
@@ -220,6 +220,27 @@ const prisma = new PrismaClient();
         regular_size_amount: 3,
         fixed_amount: 0,
         type: 'CHEEZE_TEA',
+      },
+    ],
+  }); */
+
+  await prisma.productCategory.createMany({
+    data: [
+      {
+        name: 'Cheeze Tea',
+        code: 'CHEEZE_TEA',
+      },
+      {
+        name: 'Milk Tea',
+        code: 'MILK_TEA',
+      },
+      {
+        name: 'Green Tea and Lemonade',
+        code: 'GREEN_TEA_AND_LEMONADE',
+      },
+      {
+        name: 'Serradura',
+        code: 'SERRADURA',
       },
     ],
   });
