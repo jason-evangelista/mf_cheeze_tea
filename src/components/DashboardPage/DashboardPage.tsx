@@ -46,6 +46,7 @@ import { DashboardContext } from './DashboardContext';
 import SalesSettings from './SalesSettings';
 
 const DashboardPage = () => {
+  console.log(process.env.EMAILER_USER, process.env.EMAILER_USER);
   const router = useRouter();
   const { colors } = useMantineTheme();
   const {

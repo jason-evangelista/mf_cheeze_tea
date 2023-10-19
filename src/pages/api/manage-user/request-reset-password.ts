@@ -42,6 +42,7 @@ const requestPasswordApi = async (
       }
     }
   } catch (e) {
+    console.log(e);
     return res.status(400).json({
       message: 'Error requesting password reset, Please try again',
     });
