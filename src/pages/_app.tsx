@@ -22,7 +22,8 @@ export default function App({ Component, pageProps }: AppProps) {
     router.pathname.includes('/products') ||
     router.pathname.includes('/orders') ||
     router.pathname.includes('/sales-report') ||
-    router.pathname.includes('/create-order');
+    router.pathname.includes('/create-order') ||
+    router.pathname.includes('/manage-user');
 
   const isMaintence = Number(process.env.NEXT_PUBLIC_MAINTENANCE_MODE);
 

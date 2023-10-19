@@ -6,6 +6,7 @@ import {
   useGetAllDashboardProductQuery,
 } from '@/services/dashboardService';
 
+import { UserContext } from '@/providers/AuthProvider';
 import {
   useGetAllCategoryPerformanceQuery,
   useGetAllProductPerformanceQuery,
@@ -46,6 +47,7 @@ import { DashboardContext } from './DashboardContext';
 import SalesSettings from './SalesSettings';
 
 const DashboardPage = () => {
+  const user = useContext(UserContext);
   const router = useRouter();
   const { colors } = useMantineTheme();
   const {

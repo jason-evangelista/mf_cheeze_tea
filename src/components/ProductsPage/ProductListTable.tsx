@@ -1,6 +1,5 @@
 import { mapProductType } from '@/constants/productType';
 import usePagination from '@/hooks/usePagination';
-import useToggleContainer from '@/hooks/useToggleContainer';
 import { ProductSchema } from '@/schema/schema';
 import {
   useDeleteProductMutation,
@@ -11,6 +10,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
 import DeleteModal from '../common/DeleteModal';
 import PriceDisplay from '../common/PriceDisplay';
@@ -40,7 +40,7 @@ const ProductListTable = ({ handleGetProductInfo }: ProductListTableProps) => {
       showAll: false,
     });
 
-  const { isOpen, handleToggle, handleClose } = useToggleContainer();
+  const [opened, { open, close }] = useDisclosure(false);
 
   useEffect(() => {
     if (isSuccess) {
@@ -109,7 +109,7 @@ const ProductListTable = ({ handleGetProductInfo }: ProductListTableProps) => {
                     id: data.row.original.id,
                     name: data.row.original.name,
                   });
-                  handleToggle();
+                  open();
                 }}
                 color="red"
                 leftIcon={<IconTrash size={18} />}
@@ -131,8 +131,8 @@ const ProductListTable = ({ handleGetProductInfo }: ProductListTableProps) => {
   return (
     <div>
       <DeleteModal
-        isOpen={isOpen}
-        handleToggle={handleToggle}
+        onClose={close}
+        opened={opened}
         deleteQuery={useDeleteProductMutation}
         message={
           <span>
@@ -143,7 +143,6 @@ const ProductListTable = ({ handleGetProductInfo }: ProductListTableProps) => {
         params={{
           id: productDelete?.id,
         }}
-        handleClose={handleClose}
       />
       <DataTable<ProductDataTableShape>
         columns={columns}

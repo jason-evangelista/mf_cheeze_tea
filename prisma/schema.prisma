@@ -12,14 +12,16 @@ datasource db {
 }
 
 model Account {
-  id         String   @id @default(cuid())
-  username   String   @unique @db.VarChar(255)
-  email      String?  @unique @db.VarChar(255)
-  password   String   @db.LongText
-  token      String?  @db.LongText
-  status     Status   @default(ACTIVE)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id           String      @id @default(cuid())
+  username     String      @unique @db.VarChar(255)
+  email        String?     @unique @db.VarChar(255)
+  password     String      @db.LongText
+  token        String?     @db.LongText
+  status       Status      @default(ACTIVE)
+  created_at   DateTime    @default(now())
+  updated_at   DateTime    @updatedAt
+  account_type AccountType @default(MEMBER)
+  reset_id     String?
 
   @@map("accounts")
 }
@@ -123,4 +125,9 @@ enum Status {
 enum SalesTargetType {
   MONTH
   YEAR
+}
+
+enum AccountType {
+  SUPER
+  MEMBER
 }

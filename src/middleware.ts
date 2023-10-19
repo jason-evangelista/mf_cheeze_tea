@@ -12,12 +12,12 @@ export async function middleware(req: NextRequest) {
   });
 
   if (session?.user) {
-    if (pathname.includes('/sign-in')) {
+    if (pathname.includes('/sign-in') || pathname.includes('/reset-password')) {
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
     return res;
   } else {
-    if (pathname.includes('/sign-in')) {
+    if (pathname.includes('/sign-in') || pathname.includes('/reset-password')) {
       return res;
     }
     return NextResponse.redirect(new URL('/sign-in', req.url));
@@ -31,5 +31,8 @@ export const config = {
     '/products/:path*',
     '/orders',
     '/sales-report',
+    '/create-order',
+    '/manage-user',
+    '/reset-password',
   ],
 };

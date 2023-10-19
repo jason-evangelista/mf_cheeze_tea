@@ -76,13 +76,13 @@ const OrderDetailsInfo = ({ orderSnapshot }: OrderDetailsInfoProps) => {
                     <Text fw={500}>
                       {item?.orderProduct?.name}
                       {item?.regularSizeQuantity ? (
-                        <Badge color="teal">{regularSizeCount}</Badge>
+                        <Badge color="teal" variant='outline'>{regularSizeCount}</Badge>
                       ) : null}
                       {item?.largeSizeQuantity ? (
-                        <Badge color="teal">{largeSizeCount}</Badge>
+                        <Badge color="teal" variant='outline'>{largeSizeCount}</Badge>
                       ) : null}
                       {item?.fixedPriceQuantity ? (
-                        <Badge color="teal">{fixedSizeCount}</Badge>
+                        <Badge color="teal" variant='outline'>{fixedSizeCount}</Badge>
                       ) : null}
                     </Text>
                   </List.Item>

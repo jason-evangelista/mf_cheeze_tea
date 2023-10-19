@@ -1,14 +1,18 @@
+import { UserContext } from '@/providers/AuthProvider';
 import { NavLink, ThemeIcon } from '@mantine/core';
 import {
   IconCoin,
   IconReportAnalytics,
   IconShoppingCart,
+  IconUserPlus,
 } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ReactNode } from 'react';
+import { ReactNode, useContext } from 'react';
 
 const SalesNavigation = () => {
+  const user = useContext(UserContext);
+  const isSuperUser = user?.account_type === 'SUPER';
   const router = useRouter();
   const SALES_NAVIGATION_LINKS: {
     link: string;
@@ -30,6 +34,15 @@ const SalesNavigation = () => {
       label: 'Orders',
       icon: <IconCoin size={18} />,
     },
+    ...(isSuperUser
+      ? [
+          {
+            link: '/manage-user',
+            label: 'Manage User',
+            icon: <IconUserPlus size={18} />,
+          },
+        ]
+      : []),
   ];
 
   return (
