@@ -8,15 +8,15 @@ const emailSender = async (email: string, username: string) => {
     port: 465,
     secure: true,
     auth: {
-      user: process.env.NEXT_PUBLIC_EMAILER_USER,
-      pass: process.env.NEXT_PUBLIC_EMAILER_PASSWORD,
+      user: 'mfcheeze-support@insider-hub.com',
+      pass: '#Ai-p2HhTq_fLC3',
     },
   });
 
   const emailTemplate = render(ForgotPassword({ email, username }));
 
   const options = {
-    from: process.env.EMAILER_USER,
+    from: 'mfcheeze-support@insider-hub.com',
     to: email,
     subject: 'Reset Password',
     html: emailTemplate,
