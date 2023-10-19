@@ -8,8 +8,8 @@ const emailSender = async (email: string, username: string) => {
     port: 465,
     secure: true,
     auth: {
-      user: process.env.EMAILER_USER,
-      pass: process.env.EMAILER_PASSWORD,
+      user: process.env.NEXT_PUBLIC_EMAILER_USER,
+      pass: process.env.NEXT_PUBLIC_EMAILER_PASSWORD,
     },
   });
 
