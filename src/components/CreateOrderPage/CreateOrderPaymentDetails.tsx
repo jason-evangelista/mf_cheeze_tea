@@ -84,7 +84,7 @@ const CreateOrderPaymentDetails = ({
             </div>
           </>
         ) : null}
-        {payment! > totalAmount && (
+        {payment! >= totalAmount && (
           <Button
             loading={loading}
             onClick={() =>
