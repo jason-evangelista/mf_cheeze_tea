@@ -382,7 +382,7 @@ const DashboardPage = () => {
                       bulletSize={18}
                       lineWidth={1}
                       active={999}
-                      color="blue"
+                      color="orange"
                     >
                       {Object.entries(memoBestSellingProduct)
                         .filter((item) => item[0] !== 'undefined')

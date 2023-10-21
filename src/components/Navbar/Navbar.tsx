@@ -3,6 +3,7 @@ import { Avatar, Menu, Text } from '@mantine/core';
 import { IconLogout } from '@tabler/icons-react';
 import jsCookie from 'js-cookie';
 import { useContext } from 'react';
+
 const Navbar = () => {
   const user = useContext(UserContext);
 
@@ -12,7 +13,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="flex-1 flex items-center justify-between px-4 text-white">
+    <nav className="flex-1 flex items-center justify-between px-4 text-white bg-orange-500">
       <div aria-label="logo">
         <h1 className="font-bold text-xl">Mf Cheeze Tea</h1>
       </div>

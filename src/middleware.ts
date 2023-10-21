@@ -11,16 +11,46 @@ export async function middleware(req: NextRequest) {
     serverCookie: getCookie?.value,
   });
 
-  if (session?.user) {
-    if (pathname.includes('/sign-in') || pathname.includes('/reset-password')) {
-      return NextResponse.redirect(new URL('/dashboard', req.url));
-    }
-    return res;
-  } else {
-    if (pathname.includes('/sign-in') || pathname.includes('/reset-password')) {
+  if (session?.user?.account_type === 'SUPER') {
+    if (session?.user) {
+      if (
+        pathname.includes('/sign-in') ||
+        pathname.includes('/reset-password')
+      ) {
+        return NextResponse.redirect(new URL('/dashboard', req.url));
+      }
       return res;
+    } else {
+      if (
+        pathname.includes('/sign-in') ||
+        pathname.includes('/reset-password')
+      ) {
+        return res;
+      }
+      return NextResponse.redirect(new URL('/sign-in', req.url));
     }
-    return NextResponse.redirect(new URL('/sign-in', req.url));
+  } else {
+    if (session?.user) {
+      if (
+        pathname.includes('/sign-in') ||
+        pathname.includes('/reset-password') ||
+        pathname.includes('/dashboard') ||
+        pathname.includes('/sales-report') ||
+        pathname.includes('/manage-user') ||
+        pathname.includes('/products')
+      ) {
+        return NextResponse.redirect(new URL('/orders', req.url));
+      }
+      return res;
+    } else {
+      if (
+        pathname.includes('/sign-in') ||
+        pathname.includes('/reset-password')
+      ) {
+        return res;
+      }
+      return NextResponse.redirect(new URL('/sign-in', req.url));
+    }
   }
 }
 

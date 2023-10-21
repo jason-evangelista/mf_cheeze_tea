@@ -34,6 +34,7 @@ export default function App({ Component, pageProps }: AppProps) {
       theme={{
         colorScheme: 'light',
         fontFamily: 'Poppins',
+        primaryColor: 'orange',
       }}
     >
       {isMaintence ? (

@@ -1,4 +1,11 @@
-import { Button, PasswordInput, Select, Stack, TextInput } from '@mantine/core';
+import {
+  Button,
+  LoadingOverlay,
+  PasswordInput,
+  Select,
+  Stack,
+  TextInput,
+} from '@mantine/core';
 import { AccountType } from '@prisma/client';
 import { useState } from 'react';
 import { UserFormCredProps } from './ManageUserPage';
@@ -11,6 +18,9 @@ type UserFormProps = {
   loading: boolean;
   handleRequestPassReset: VoidFunction;
   passResetLoading?: boolean;
+  // eslint-disable-next-line no-unused-vars
+  handleDeleteUse: (id: string) => void;
+  deleteUserLoading: boolean;
 };
 
 const UserForm = ({
@@ -20,6 +30,8 @@ const UserForm = ({
   loading,
   handleRequestPassReset,
   passResetLoading,
+  deleteUserLoading,
+  handleDeleteUse,
 }: UserFormProps) => {
   const isUpdate = !!id;
 
@@ -30,8 +42,11 @@ const UserForm = ({
     existAccount?.account_type ?? 'MEMBER'
   );
 
+  const isLoading = loading || passResetLoading || deleteUserLoading;
+
   return (
-    <Stack spacing="sm">
+    <Stack spacing="sm" pos="relative">
+      <LoadingOverlay visible={isLoading} />
       <TextInput
         label="Email Address"
         placeholder="Enter Email address"
@@ -67,7 +82,7 @@ const UserForm = ({
         <>
           <Button
             loading={loading}
-            disabled={loading}
+            disabled={isLoading}
             mt="sm"
             onClick={() =>
               handleSubmit({
@@ -81,30 +96,40 @@ const UserForm = ({
             {isUpdate ? 'Update User' : 'Create User'}
           </Button>
           <Button
-            color="red"
-            variant="light"
+            color="green"
             onClick={handleRequestPassReset}
+            disabled={isLoading}
             loading={passResetLoading}
           >
             Send Reset Password
           </Button>
+          <Button
+            onClick={() => handleDeleteUse(id)}
+            color="red"
+            disabled={isLoading}
+            loading={deleteUserLoading}
+          >
+            Delete User
+          </Button>
         </>
       ) : (
-        <Button
-          loading={loading}
-          disabled={loading || !emailAddress || !username || !password}
-          mt="sm"
-          onClick={() =>
-            handleSubmit({
-              account_type: userType as AccountType,
-              email: emailAddress,
-              password,
-              username,
-            })
-          }
-        >
-          {isUpdate ? 'Update User' : 'Create User'}
-        </Button>
+        <>
+          <Button
+            loading={isLoading}
+            disabled={!emailAddress || !username || !password || isLoading}
+            mt="sm"
+            onClick={() =>
+              handleSubmit({
+                account_type: userType as AccountType,
+                email: emailAddress,
+                password,
+                username,
+              })
+            }
+          >
+            {isUpdate ? 'Update User' : 'Create User'}
+          </Button>
+        </>
       )}
     </Stack>
   );

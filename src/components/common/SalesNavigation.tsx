@@ -1,4 +1,5 @@
 import { UserContext } from '@/providers/AuthProvider';
+import Logo from '@/styles/assets/logo.png';
 import { NavLink, ThemeIcon } from '@mantine/core';
 import {
   IconCoin,
@@ -6,6 +7,7 @@ import {
   IconShoppingCart,
   IconUserPlus,
 } from '@tabler/icons-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ReactNode, useContext } from 'react';
@@ -19,30 +21,36 @@ const SalesNavigation = () => {
     label: string;
     icon: ReactNode;
   }[] = [
-    {
-      link: '/dashboard',
-      label: 'Dashboard',
-      icon: <IconReportAnalytics size={18} />,
-    },
-    {
-      link: '/products/list',
-      label: 'Products',
-      icon: <IconShoppingCart size={18} />,
-    },
-    {
-      link: '/orders',
-      label: 'Orders',
-      icon: <IconCoin size={18} />,
-    },
     ...(isSuperUser
       ? [
+          {
+            link: '/dashboard',
+            label: 'Dashboard',
+            icon: <IconReportAnalytics size={18} />,
+          },
+          {
+            link: '/products/list',
+            label: 'Products',
+            icon: <IconShoppingCart size={18} />,
+          },
+          {
+            link: '/orders',
+            label: 'Orders',
+            icon: <IconCoin size={18} />,
+          },
           {
             link: '/manage-user',
             label: 'Manage User',
             icon: <IconUserPlus size={18} />,
           },
         ]
-      : []),
+      : [
+          {
+            link: '/orders',
+            label: 'Orders',
+            icon: <IconCoin size={18} />,
+          },
+        ]),
   ];
 
   return (
@@ -61,6 +69,14 @@ const SalesNavigation = () => {
           />
         </Link>
       ))}
+      <div className="flex justify-center mt-4">
+        <Image
+          src={Logo}
+          alt="Macee Float Cheeze Tea"
+          width={120}
+          style={{ objectFit: 'cover' }}
+        />
+      </div>
     </nav>
   );
 };

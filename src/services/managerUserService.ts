@@ -71,6 +71,13 @@ const manageUserService = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Manage User'],
     }),
+    deleteUser: builder.mutation<BaseSuccessResponse, { id: string }>({
+      query: ({ id }) => ({
+        url: `/manage-user/delete?id=${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Manage User'],
+    }),
   }),
 });
 
@@ -81,4 +88,5 @@ export const {
   useRequestPasswordResetMutation,
   useCheckResetPasswordIdQuery,
   useResetPasswordMutation,
+  useDeleteUserMutation,
 } = manageUserService;

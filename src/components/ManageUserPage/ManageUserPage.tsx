@@ -1,6 +1,7 @@
 import { UserContext } from '@/providers/AuthProvider';
 import {
   useCreateUserMutation,
+  useDeleteUserMutation,
   useGetAllUserQuery,
   useRequestPasswordResetMutation,
   useUpdateUserMutation,
@@ -31,6 +32,7 @@ const ManageUserPage = () => {
   const [updateUserFn, updateUserState] = useUpdateUserMutation();
   const [requestPassResetFn, requestPassResetState] =
     useRequestPasswordResetMutation();
+  const [deleteUserFn, deleteUserState] = useDeleteUserMutation();
 
   const [userCred, setUserCred] = useState<UserFormCredProps>();
   const [userId, setUserId] = useState('');
@@ -38,6 +40,12 @@ const ManageUserPage = () => {
   const handleEditAccount = (data: UserFormCredProps) => {
     setUserId(data?.id ?? '');
     setUserCred(data);
+  };
+
+  const handleDeleteAccount = async (_id: string) => {
+    await deleteUserFn({
+      id: _id,
+    });
   };
 
   const handleSubmit = async (data: UserFormCredProps) => {
@@ -54,6 +62,7 @@ const ManageUserPage = () => {
     await requestPassResetFn({ email: userCred?.email ?? '' });
   };
 
+  // Send Password Request
   useEffect(() => {
     if (requestPassResetState?.isSuccess) {
       close();
@@ -120,6 +129,27 @@ const ManageUserPage = () => {
     }
   }, [updateUserState?.isSuccess, updateUserState?.isError]);
 
+  // Delete user
+  useEffect(() => {
+    if (deleteUserState?.isSuccess) {
+      close();
+      notifications.show({
+        message: deleteUserState?.data?.message,
+        color: 'green',
+      });
+      allUsers?.refetch();
+    }
+
+    if (deleteUserState?.isError) {
+      close();
+      notifications.show({
+        // @ts-ignore
+        message: deleteUserState?.error?.data?.message,
+        color: 'red',
+      });
+    }
+  }, [deleteUserState?.isSuccess, deleteUserState?.isError]);
+
   if (!isSuperUser)
     return (
       <Paper>
@@ -150,6 +180,8 @@ const ManageUserPage = () => {
             loading={createUserState?.isLoading || updateUserState?.isLoading}
             handleRequestPassReset={handleRequestPassReset}
             passResetLoading={requestPassResetState?.isLoading}
+            handleDeleteUse={handleDeleteAccount}
+            deleteUserLoading={deleteUserState?.isLoading}
           />
         </form>
       </Modal>

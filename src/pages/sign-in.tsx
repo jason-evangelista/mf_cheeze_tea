@@ -1,6 +1,7 @@
 import { SignInSchema, signInSchema } from '@/schema/schema';
 import { useRequestPasswordResetMutation } from '@/services/managerUserService';
 import { useLoginUserMutation } from '@/services/userService';
+import Logo from '@/styles/assets/logo.png';
 import { parseErrorResponse } from '@/utils/parseErrorResponse';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Modal, PasswordInput, Stack, TextInput } from '@mantine/core';
@@ -8,6 +9,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import jsCookie from 'js-cookie';
 import Head from 'next/head';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -91,12 +93,17 @@ const SignIn = () => {
       <Head>
         <title>Sign in | MF Cheeze tea</title>
       </Head>
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center">
         <form onSubmit={handleSubmit(handleSignIn)}>
+          <div>
+            <Image
+              src={Logo}
+              alt="Macee Float Cheeze Tea"
+              width={250}
+              style={{ objectFit: 'cover' }}
+            />
+          </div>
           <Stack spacing="sm">
-            <h1 className="text-xl font-medium text-center">
-              MF Cheeze Tea POS
-            </h1>
             <TextInput
               label="Username"
               placeholder="Username"
