@@ -24,6 +24,7 @@ const OrderDetailsInfo = ({ orderSnapshot }: OrderDetailsInfoProps) => {
   const parseOrderSnapshot = JSON.parse(
     orderSnapshot?.snapshot_record
   ) as OrderCart[];
+  console.log({ orderSnapshot });
 
   return (
     <>
@@ -32,7 +33,7 @@ const OrderDetailsInfo = ({ orderSnapshot }: OrderDetailsInfoProps) => {
           <Divider />
           <Box>
             <Badge variant="light">Customer Name</Badge>
-            <Text fw={600}>{orderSnapshot?.customer_name}</Text>
+            <Text fw={600}>{orderSnapshot?.customer_name || '-'}</Text>
           </Box>
           <Box>
             <Badge>Total Amount</Badge>
@@ -76,13 +77,19 @@ const OrderDetailsInfo = ({ orderSnapshot }: OrderDetailsInfoProps) => {
                     <Text fw={500}>
                       {item?.orderProduct?.name}
                       {item?.regularSizeQuantity ? (
-                        <Badge color="teal" variant='outline'>{regularSizeCount}</Badge>
+                        <Badge color="teal" variant="outline">
+                          {regularSizeCount}
+                        </Badge>
                       ) : null}
                       {item?.largeSizeQuantity ? (
-                        <Badge color="teal" variant='outline'>{largeSizeCount}</Badge>
+                        <Badge color="teal" variant="outline">
+                          {largeSizeCount}
+                        </Badge>
                       ) : null}
                       {item?.fixedPriceQuantity ? (
-                        <Badge color="teal" variant='outline'>{fixedSizeCount}</Badge>
+                        <Badge color="teal" variant="outline">
+                          {fixedSizeCount}
+                        </Badge>
                       ) : null}
                     </Text>
                   </List.Item>

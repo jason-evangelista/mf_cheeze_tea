@@ -43,7 +43,7 @@ const OrderSnapshotListTable = () => {
   const columns = useMemo(
     () => [
       columnHelper.accessor('customer_name', {
-        cell: (data) => data.getValue() ?? '-',
+        cell: (data) => data.getValue() || '-',
         header: () => <span>Customer Name</span>,
       }),
       columnHelper.accessor('payment', {
