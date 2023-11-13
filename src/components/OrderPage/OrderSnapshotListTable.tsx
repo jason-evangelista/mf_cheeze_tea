@@ -60,7 +60,7 @@ const OrderSnapshotListTable = () => {
       }),
       columnHelper.accessor('created_at', {
         cell: (data) => format(new Date(data.getValue()), 'dd, MMMM yyyy - hh:mm a'),
-        header: () => <span>Total Amount</span>,
+        header: () => <span>Order Date</span>,
       }),
       columnHelper.display({
         id: 'actions',
