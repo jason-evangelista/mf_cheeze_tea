@@ -19,6 +19,7 @@ const dashboardApiService = baseApi.injectEndpoints({
         totalSales: number;
         isSalesGrow: boolean;
         growPercentage: string;
+        salesTarget: number;
         date: {
           type: 'Month' | 'Year' | 'Today';
           label: string;

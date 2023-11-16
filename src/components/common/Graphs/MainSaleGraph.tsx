@@ -60,6 +60,8 @@ const MainSaleGraph = ({
   const { salesType } = useContext(DashboardContext);
   const [chart, setChart] = useState<'Line' | 'Bar' | 'Line Filled'>('Line');
 
+  const hideSalesTarget = false;
+
   const isDay = salesType === 'Today';
 
   const { isLoading, data: productData } = useGetAllProductQuery({
@@ -85,13 +87,16 @@ const MainSaleGraph = ({
         <Button onClick={toggle} leftIcon={<IconAdjustmentsAlt />} size="xs">
           Filter Data
         </Button>
-        <Button
-          onClick={handleOpenSalesTarget}
-          leftIcon={<IconReportAnalytics />}
-          size="xs"
-        >
-          Sales Target
-        </Button>
+        {hideSalesTarget && (
+          <Button
+            onClick={handleOpenSalesTarget}
+            leftIcon={<IconReportAnalytics />}
+            size="xs"
+          >
+            Sales Target
+          </Button>
+        )}
+
         <Select
           defaultValue={chart}
           data={['Line', 'Bar', 'Line Filled']}

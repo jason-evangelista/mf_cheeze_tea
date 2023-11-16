@@ -1,4 +1,5 @@
 import { parseMonthToNumber } from '@/constants/parseMonth';
+import calculateNextSalesTarget from '@/utils/calculateNextSalesTarget';
 import { prismaClient } from '@/utils/prismaClient';
 import { endOfMonth, endOfYear, format, startOfYear, sub } from 'date-fns';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -71,6 +72,10 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
             totalSales,
             isSalesGrow: totalSales > behindDateTotalSales,
             growPercentage,
+            salesTarget: calculateNextSalesTarget(
+              totalSales,
+              behindDateTotalSales
+            ),
             date: {
               type: 'Month',
               label: format(firstDate, 'MMMM yyyy'),
@@ -138,6 +143,10 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
             totalSales,
             isSalesGrow: totalSales > behindDateTotalSales,
             growPercentage,
+            salesTarget: calculateNextSalesTarget(
+              totalSales,
+              behindDateTotalSales
+            ),
             date: {
               type: 'Year',
               label: format(new Date(+body?.year, 0), 'yyyy'),

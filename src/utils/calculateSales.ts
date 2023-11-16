@@ -19,15 +19,6 @@ const calculateSalesByMonth = (
 
   const salesNextTarget = currentMonthSales + growthRate * currentMonthSales;
 
-  console.log({
-    label,
-    growthRate,
-    growthSalesParse: growthRate.toFixed(2),
-    currentMonthSales,
-    prevMonthSales,
-    salesNextTarget: salesNextTarget.toFixed(0),
-  });
-
   return {
     actual_sales: month.reduce((prev, { sub_total }) => prev + sub_total, 0),
     label,
@@ -41,8 +32,7 @@ const calculateSalesByMonth = (
 export const calculateSalesByYear = async (
   startYear: number,
   endYear: number,
-  data: Order[],
-  salesTarget: SalesTarget[]
+  data: Order[]
 ) => {
   const yearGroup: number[] = [];
   for (let i = startYear; i <= endYear; i++) {
@@ -54,9 +44,24 @@ export const calculateSalesByYear = async (
       (item) => !item.order_date.toISOString().search(year.toString())
     );
 
-    const findYearSaleTarget =
-      salesTarget.find((item) => item.year?.toString().match(year.toString()))
-        ?.target ?? 0;
+    console.log({ findItem });
+
+    const currentYearSales = findItem.reduce(
+      (prev, { sub_total }) => prev + sub_total,
+      0
+    );
+    const prevYearSales = data
+      ?.filter(
+        (item) => !item.order_date.toISOString().search((year - 1).toString())
+      )
+      .reduce((prev, { sub_total }) => prev + sub_total, 0);
+
+    const growthRate = (currentYearSales - prevYearSales) / prevYearSales;
+    const salesNextTarget = currentYearSales + growthRate * currentYearSales;
+
+    // const findYearSaleTarget =
+    //   salesTarget.find((item) => item.year?.toString().match(year.toString()))
+    //     ?.target ?? 0;
 
     return {
       ...prev,
@@ -66,10 +71,15 @@ export const calculateSalesByYear = async (
           0
         ),
         label: year.toString(),
-        sales_target: findYearSaleTarget,
+        sales_target:
+          salesNextTarget.toFixed(0) === 'Infinity'
+            ? 0
+            : salesNextTarget.toFixed(0),
       },
     };
   }, {});
+
+  console.log({ divideItemByYear });
 
   return divideItemByYear;
 };

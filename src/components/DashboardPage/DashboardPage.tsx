@@ -6,6 +6,7 @@ import {
   useGetAllDashboardProductQuery,
 } from '@/services/dashboardService';
 
+import { parseSingleMonthToNumber } from '@/constants/parseMonth';
 import {
   useGetAllCategoryPerformanceQuery,
   useGetAllProductPerformanceQuery,
@@ -220,6 +221,20 @@ const DashboardPage = () => {
     salesYear,
   ]);
 
+  useEffect(() => {
+    if (salesType === 'Month') {
+      router.replace({
+        query: {
+          ...router.query,
+          v: Object.keys(parseSingleMonthToNumber).find(
+            (key) =>
+              parseSingleMonthToNumber[key] === new Date().getMonth().toString()
+          ),
+        },
+      });
+    }
+  }, [salesType]);
+
   return (
     <>
       <Modal title="Sales Target" onClose={close} opened={opened}>
@@ -313,37 +328,55 @@ const DashboardPage = () => {
                       />
                     </Title>
                   </Box>
-                  {!salesNotValid && (
-                    <Box>
-                      <Badge
-                        variant="light"
-                        color={
-                          dashboardOrderState?.data?.data?.isSalesGrow
-                            ? 'green'
-                            : 'red'
-                        }
-                      >
-                        Sales Growth From Past Month %
-                      </Badge>
-                      <Title
-                        order={2}
-                        color={
-                          dashboardOrderState?.data?.data?.isSalesGrow
-                            ? 'green'
-                            : 'red'
-                        }
-                      >
-                        {dashboardOrderState?.data?.data?.growPercentage}%
-                        <span className="align-middle">
-                          {dashboardOrderState?.data?.data?.isSalesGrow ? (
-                            <IconTrendingUp />
-                          ) : (
-                            <IconTrendingDown />
-                          )}
-                        </span>
-                      </Title>
-                    </Box>
-                  )}
+                  {!salesNotValid &&
+                    (salesType === 'Month' || salesType === 'Year') && (
+                      <>
+                        <Box>
+                          <Badge
+                            variant="filled"
+                            color={
+                              dashboardOrderState?.data?.data?.isSalesGrow
+                                ? 'green'
+                                : 'red'
+                            }
+                          >
+                            Sales Growth% From Past{' '}
+                            {salesType === 'Month' ? 'Month' : 'Year'}
+                          </Badge>
+                          <Title
+                            order={2}
+                            color={
+                              dashboardOrderState?.data?.data?.isSalesGrow
+                                ? 'green'
+                                : 'red'
+                            }
+                          >
+                            {dashboardOrderState?.data?.data?.growPercentage}%
+                            <span className="align-middle">
+                              {dashboardOrderState?.data?.data?.isSalesGrow ? (
+                                <IconTrendingUp />
+                              ) : (
+                                <IconTrendingDown />
+                              )}
+                            </span>
+                          </Title>
+                        </Box>
+                        <Box>
+                          <Badge color="green" variant="outline">
+                            Sales Target For&nbsp;
+                            {dashboardOrderState?.data?.data?.date.label}
+                          </Badge>
+                          <Title order={3}>
+                            <PriceDisplay
+                              fallback="No current sales target"
+                              value={
+                                dashboardOrderState?.data?.data?.salesTarget
+                              }
+                            />
+                          </Title>
+                        </Box>
+                      </>
+                    )}
                 </div>
                 <Divider className="my-2" />
                 <div aria-label="Total Orders">
@@ -355,6 +388,51 @@ const DashboardPage = () => {
                       </span>
                     )}
                   </Title>
+                </div>
+
+                <Divider className="my-2" />
+                <div aria-label="Previous Data Record">
+                  {(salesType === 'Month' || salesType === 'Year') && (
+                    <div>
+                      <Title order={6} variant="outline">
+                        Previous {salesType === 'Month' ? 'Month' : 'Year'}{' '}
+                        Sales
+                      </Title>
+
+                      <Badge variant="filled">
+                        {dashboardOrderState?.data?.data?.behindDate.date}
+                      </Badge>
+                      <Title order={4}>
+                        <PriceDisplay
+                          value={
+                            dashboardOrderState?.data?.data?.behindDate
+                              .totalSales
+                          }
+                          fallback="0"
+                        />
+                      </Title>
+                    </div>
+                  )}
+                  {salesType === 'Today' && (
+                    <div>
+                      <Title order={6} variant="outline">
+                        Previous Day Sales
+                      </Title>
+
+                      <Badge variant="filled">
+                        {dashboardOrderState?.data?.data?.behindDate.date}
+                      </Badge>
+                      <Title order={4}>
+                        <PriceDisplay
+                          value={
+                            dashboardOrderState?.data?.data?.behindDate
+                              .totalSales
+                          }
+                          fallback="0"
+                        />
+                      </Title>
+                    </div>
+                  )}
                 </div>
               </Paper>
               <Paper
