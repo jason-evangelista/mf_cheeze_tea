@@ -77,6 +77,8 @@ const MainSaleGraph = ({
     }));
   }, [data, salesType]);
 
+  console.log({ data });
+
   return (
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
       <Group className="gap-2 my-4">

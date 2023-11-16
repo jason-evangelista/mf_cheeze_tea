@@ -66,6 +66,7 @@ model OrderSnapshot {
   payment         Int
   change          Int
   status          Status   @default(ACTIVE)
+  order_date      DateTime @db.DateTime()
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 

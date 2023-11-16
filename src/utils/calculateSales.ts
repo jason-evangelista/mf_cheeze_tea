@@ -4,13 +4,39 @@ import { eachDayOfInterval, format } from 'date-fns';
 const calculateSalesByMonth = (
   month: Order[],
   label: string,
-  salesTarget: SalesTarget[]
-) => ({
-  actual_sales: month.reduce((prev, { sub_total }) => prev + sub_total, 0),
-  label,
-  sales_target:
-    salesTarget.find((item) => item.month?.match(label))?.target ?? 0,
-});
+  salesTarget: SalesTarget[],
+  prevMonth: Order[]
+) => {
+  const currentMonthSales = month.reduce(
+    (prev, { sub_total }) => prev + sub_total,
+    0
+  );
+  const prevMonthSales = prevMonth.reduce(
+    (prev, { sub_total }) => prev + sub_total,
+    0
+  );
+  const growthRate = (currentMonthSales - prevMonthSales) / prevMonthSales;
+
+  const salesNextTarget = currentMonthSales + growthRate * currentMonthSales;
+
+  console.log({
+    label,
+    growthRate,
+    growthSalesParse: growthRate.toFixed(2),
+    currentMonthSales,
+    prevMonthSales,
+    salesNextTarget: salesNextTarget.toFixed(0),
+  });
+
+  return {
+    actual_sales: month.reduce((prev, { sub_total }) => prev + sub_total, 0),
+    label,
+    sales_target:
+      salesNextTarget.toFixed(0) === 'Infinity'
+        ? 0
+        : salesNextTarget.toFixed(0),
+  };
+};
 
 export const calculateSalesByYear = async (
   startYear: number,

@@ -14,8 +14,14 @@ const createOrderApi = async (req: NextApiRequest, res: NextApiResponse) => {
   console.log(req.body);
   try {
     if (req.method === 'POST') {
-      const { orderCart, change, payment, totalAmount, customerName } =
-        req.body as BodyResponse;
+      const {
+        orderCart,
+        change,
+        payment,
+        totalAmount,
+        customerName,
+        orderDate,
+      } = req.body as BodyResponse;
 
       const parseOrder = orderCart.reduce((prev, item) => {
         let _orderCart: ModOrder[] = [];
@@ -24,7 +30,7 @@ const createOrderApi = async (req: NextApiRequest, res: NextApiResponse) => {
           _orderCart.push({
             base_amount: item?.orderProduct?.regular_size_amount!,
             product_id: item?.orderProduct?.id!,
-            order_date: new Date(),
+            order_date: orderDate ?? new Date(),
             sub_total:
               item?.orderProduct?.regular_size_amount! *
               item?.regularSizeQuantity,
@@ -37,7 +43,7 @@ const createOrderApi = async (req: NextApiRequest, res: NextApiResponse) => {
           _orderCart.push({
             base_amount: item?.orderProduct?.large_size_amount!,
             product_id: item?.orderProduct?.id!,
-            order_date: new Date(),
+            order_date: orderDate ?? new Date(),
             sub_total:
               item?.orderProduct?.large_size_amount! * item?.largeSizeQuantity,
             quantity_sale: item?.largeSizeQuantity,
@@ -49,7 +55,7 @@ const createOrderApi = async (req: NextApiRequest, res: NextApiResponse) => {
           _orderCart.push({
             base_amount: item?.orderProduct?.fixed_amount!,
             product_id: item?.orderProduct?.id!,
-            order_date: new Date(),
+            order_date: orderDate ?? new Date(),
             sub_total:
               item?.orderProduct?.fixed_amount! * item?.fixedPriceQuantity,
             quantity_sale: item?.fixedPriceQuantity,
@@ -71,6 +77,7 @@ const createOrderApi = async (req: NextApiRequest, res: NextApiResponse) => {
           payment,
           customer_name: customerName ?? '',
           total_amount: totalAmount,
+          order_date: orderDate ?? new Date(),
         },
       });
 

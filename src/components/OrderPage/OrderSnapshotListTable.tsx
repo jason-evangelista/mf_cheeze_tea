@@ -58,8 +58,9 @@ const OrderSnapshotListTable = () => {
         cell: (data) => <PriceDisplay value={data.getValue()} />,
         header: () => <span>Total Amount</span>,
       }),
-      columnHelper.accessor('created_at', {
-        cell: (data) => format(new Date(data.getValue()), 'dd, MMMM yyyy - hh:mm a'),
+      columnHelper.accessor('order_date', {
+        cell: (data) =>
+          format(new Date(data.getValue()), 'dd, MMMM yyyy - hh:mm a'),
         header: () => <span>Order Date</span>,
       }),
       columnHelper.display({

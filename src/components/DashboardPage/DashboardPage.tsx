@@ -323,7 +323,7 @@ const DashboardPage = () => {
                             : 'red'
                         }
                       >
-                        Sales Growth %
+                        Sales Growth From Past Month %
                       </Badge>
                       <Title
                         order={2}
