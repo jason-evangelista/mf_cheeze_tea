@@ -18,7 +18,7 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       });
 
-      const [Jan, Feb, Mar, Apr, May, June, July, Aug, Sep, Oct, Nov, Dec] =
+      const [Jan, Feb, Mar, Apr, May, June, July, Aug, Sep, Oct, Nov] =
         await Promise.all([
           await prismaClient.order.findMany({
             where: {
