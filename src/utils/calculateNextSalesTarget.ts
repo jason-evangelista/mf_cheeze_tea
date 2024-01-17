@@ -1,4 +1,5 @@
 const calculateNextSalesTarget = (currentSales: number, prevSales: number) => {
+  console.log({ currentSales, prevSales });
   const growthRate = (currentSales - prevSales) / prevSales;
 
   const salesNextTarget = currentSales + growthRate * currentSales;

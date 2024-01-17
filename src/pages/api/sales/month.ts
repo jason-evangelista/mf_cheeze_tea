@@ -1,6 +1,7 @@
 import { parseDate, transformSalesMonth } from '@/constants/salesDates';
 import calculateSalesByMonth from '@/utils/calculateSales';
 import { prismaClient } from '@/utils/prismaClient';
+import { sub } from 'date-fns';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -191,26 +192,45 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       });
 
+      const stepBehindNov = await prismaClient.order.findMany({
+        where: {
+          order_date: {
+            gte: sub(parseDate(prevDateYear?.Dec?.start), { months: 1 }),
+            lte: sub(parseDate(prevDateYear?.Dec?.end), { months: 1 }),
+          },
+          ...(body.productId && {
+            AND: {
+              product_id: body.productId,
+            },
+          }),
+        },
+      });
+
       return res.status(200).json({
         message: 'Fetched all sales by month',
         data: {
           Jan: calculateSalesByMonth(
-            Jan,
+            prevMonthDecYear,
             'Jan',
+            findSalesTarget,
+            stepBehindNov
+          ),
+          Feb: calculateSalesByMonth(
+            Jan,
+            'Feb',
             findSalesTarget,
             prevMonthDecYear
           ),
-          Feb: calculateSalesByMonth(Feb, 'Feb', findSalesTarget, Jan),
-          Mar: calculateSalesByMonth(Mar, 'Mar', findSalesTarget, Feb),
-          Apr: calculateSalesByMonth(Apr, 'Apr', findSalesTarget, Mar),
-          May: calculateSalesByMonth(May, 'May', findSalesTarget, Apr),
-          June: calculateSalesByMonth(June, 'June', findSalesTarget, May),
-          July: calculateSalesByMonth(July, 'July', findSalesTarget, June),
-          Aug: calculateSalesByMonth(Aug, 'Aug', findSalesTarget, July),
-          Sep: calculateSalesByMonth(Sep, 'Sep', findSalesTarget, Aug),
-          Oct: calculateSalesByMonth(Oct, 'Oct', findSalesTarget, Sep),
-          Nov: calculateSalesByMonth(Nov, 'Nov', findSalesTarget, Oct),
-          Dec: calculateSalesByMonth(Dec, 'Dec', findSalesTarget, Nov),
+          Mar: calculateSalesByMonth(Feb, 'Mar', findSalesTarget, Jan),
+          Apr: calculateSalesByMonth(Mar, 'Apr', findSalesTarget, Feb),
+          May: calculateSalesByMonth(Apr, 'May', findSalesTarget, Mar),
+          June: calculateSalesByMonth(May, 'June', findSalesTarget, Apr),
+          July: calculateSalesByMonth(June, 'July', findSalesTarget, May),
+          Aug: calculateSalesByMonth(July, 'Aug', findSalesTarget, June),
+          Sep: calculateSalesByMonth(Aug, 'Sep', findSalesTarget, July),
+          Oct: calculateSalesByMonth(Sep, 'Oct', findSalesTarget, Aug),
+          Nov: calculateSalesByMonth(Oct, 'Nov', findSalesTarget, Sep),
+          Dec: calculateSalesByMonth(Nov, 'Dec', findSalesTarget, Oct),
         },
       });
     }

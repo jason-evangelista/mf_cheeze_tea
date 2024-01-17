@@ -50,6 +50,26 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
           },
         });
 
+        // go back again from behind data
+        const stepBehindDate = sub(firstDate, { months: 2 });
+        const getOrderStepBehindDate = await prismaClient.order.findMany({
+          where: {
+            status: 'ACTIVE',
+            ...(query.productId && {
+              product_id: query.productId,
+            }),
+            order_date: {
+              gte: stepBehindDate,
+              lte: endOfMonth(stepBehindDate),
+            },
+          },
+        });
+
+        const stepBehindDateTotalSales = getOrderStepBehindDate.reduce(
+          (prev, { sub_total }) => prev + sub_total,
+          0
+        );
+
         const behindDateTotalSales = getOrderBehindDate.reduce(
           (prev, { sub_total }) => prev + sub_total,
           0
@@ -59,10 +79,23 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
           (prev, { sub_total }) => prev + sub_total,
           0
         );
+
         const growPercentage = (
           ((totalSales - behindDateTotalSales) / behindDateTotalSales) *
           100
         ).toFixed(1);
+
+        const stepBehindDateGrowPercentage =
+          ((behindDateTotalSales - stepBehindDateTotalSales) /
+            behindDateTotalSales) *
+          100;
+
+        //check
+        console.log({
+          stepBehindDateTotalSales,
+          behindDateTotalSales,
+          stepBehindDateGrowPercentage,
+        });
 
         return res.status(200).json({
           message: 'Successfully fetch Product Order',
@@ -73,8 +106,8 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
             isSalesGrow: totalSales > behindDateTotalSales,
             growPercentage,
             salesTarget: calculateNextSalesTarget(
-              totalSales,
-              behindDateTotalSales
+              behindDateTotalSales,
+              stepBehindDateTotalSales
             ),
             date: {
               type: 'Month',

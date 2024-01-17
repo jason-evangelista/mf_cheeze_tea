@@ -11,8 +11,8 @@ const salesYearApi = async (req: NextApiRequest, res: NextApiResponse) => {
         end_year: number;
         productId: string;
       };
-      const startDate = transformSalesMonth(body.start_year);
-      const endDate = transformSalesMonth(body.end_year);
+      const startDate = transformSalesMonth(body.start_year - 1);
+      const endDate = transformSalesMonth(body.end_year - 1);
 
       // const findYearSalesTarget = await prismaClient.salesTarget.findMany({
       //   where: {
@@ -34,8 +34,8 @@ const salesYearApi = async (req: NextApiRequest, res: NextApiResponse) => {
       });
 
       const yearSales = await calculateSalesByYear(
-        body?.start_year,
-        body?.end_year,
+        body?.start_year - 1,
+        body?.end_year - 1,
         getSpanYear
       );
 
