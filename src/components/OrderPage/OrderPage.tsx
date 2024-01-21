@@ -1,17 +1,24 @@
 import useToggleContainer from '@/hooks/useToggleContainer';
-import { Button, Modal, Paper, Tabs, Text } from '@mantine/core';
+import { SearchContext } from '@/providers/SearchProvider';
+import { Button, Modal, Paper, Tabs, Text, TextInput } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconPlus } from '@tabler/icons-react';
+import { IconPlus, IconSearch } from '@tabler/icons-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import OrderForm from './OrderForm';
 import OrderListTable from './OrderListTable';
 import OrderSnapshotListTable from './OrderSnapshotListTable';
 
+type TabOrder = 'group-order' | 'single-order';
+
 const OrderPage = () => {
+  const { setSearchKey, watchSearcKey, searchKey } = useContext(SearchContext);
+
   const [isProductSelected, setIsProductSelected] = useState(false);
   const { isOpen, handleToggle } = useToggleContainer();
   const [opened, { close }] = useDisclosure(false);
+
+  const [tabOrder, setTabOrder] = useState<TabOrder>('group-order');
 
   const handleIsProductSelected = () => {
     setIsProductSelected(true);
@@ -39,16 +46,17 @@ const OrderPage = () => {
           handleisProductSelected={handleIsProductSelected}
         />
       </Modal>
-      <div className="flex justify-end">
-        {/* <Button
-          size="xs"
-          color="green"
-          className=" my-2"
-          onClick={open}
-          leftIcon={<IconPlus />}
-        >
-          Add Order
-        </Button> */}
+      <div className="flex justify-between">
+        <TextInput
+          value={watchSearcKey}
+          icon={<IconSearch size={16} />}
+          placeholder={`Search ${
+            tabOrder === 'group-order' ? 'customer' : 'product'
+          } name`}
+          w={300}
+          onChange={(e) => setSearchKey(e.currentTarget.value)}
+        />
+
         <Link href="/create-order">
           <Button
             size="xs"
@@ -60,20 +68,30 @@ const OrderPage = () => {
           </Button>
         </Link>
       </div>
-      <Tabs defaultValue="group-order">
+      <Tabs
+        value={tabOrder}
+        onTabChange={(e) => {
+          setTabOrder(e as TabOrder);
+          setSearchKey('');
+        }}
+      >
         <Tabs.List>
           <Tabs.Tab value="group-order">
             <Text fw="bold">Group Order</Text>
           </Tabs.Tab>
-          <Tabs.Tab value="single-record">
+          <Tabs.Tab value="single-order">
             <Text fw="bold">Order Product</Text>
           </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="group-order">
-          <OrderSnapshotListTable />
+          {tabOrder === 'group-order' && (
+            <OrderSnapshotListTable searchKey={searchKey} />
+          )}
         </Tabs.Panel>
-        <Tabs.Panel value="single-record">
-          <OrderListTable />
+        <Tabs.Panel value="single-order">
+          {tabOrder === 'single-order' && (
+            <OrderListTable searchKey={searchKey} />
+          )}
         </Tabs.Panel>
       </Tabs>
     </Paper>

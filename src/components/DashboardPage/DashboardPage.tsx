@@ -7,6 +7,7 @@ import {
 } from '@/services/dashboardService';
 
 import { parseSingleMonthToNumber } from '@/constants/parseMonth';
+import { SearchContext } from '@/providers/SearchProvider';
 import {
   useGetAllCategoryPerformanceQuery,
   useGetAllProductPerformanceQuery,
@@ -44,13 +45,8 @@ import MainSaleGraph from '../common/Graphs/MainSaleGraph';
 import ProductPerfGraph from '../common/Graphs/ProductPerfGraph';
 import PriceDisplay from '../common/PriceDisplay';
 import { DashboardContext } from './DashboardContext';
-import SalesSettings from './SalesSettings';
 
 const DashboardPage = () => {
-  console.log(
-    process.env.NEXT_PUBLIC_EMAILER_USER,
-    process.env.NEXT_PUBLIC_EMAILER_USER
-  );
   const router = useRouter();
   const { colors } = useMantineTheme();
   const {
@@ -69,6 +65,8 @@ const DashboardPage = () => {
 
   const [createDashboardOrderSR, dashboardOrderState] =
     useCreateDashboarSalesdOrderMutation();
+
+  const { searchKey, setSearchKey } = useContext(SearchContext);
 
   const [createSalesDay, salesDayState] = useCreateSalesByDayMutation();
   const [createSalesMonth, salesMonthState] = useCreateSalesByMonthMutation();
@@ -138,6 +136,7 @@ const DashboardPage = () => {
   }, [
     dashboardOrderState?.data?.data?.orders,
     dashboardProduct?.data?.data?.products,
+    searchKey,
   ]);
 
   useEffect(() => {
@@ -154,13 +153,15 @@ const DashboardPage = () => {
         start_date: dashboardOrderDay?.start_date ?? '',
         end_date: dashboardOrderDay?.end_date ?? '',
         productId: productId?.today,
+        searchKey,
       });
       createDashboardOrderSR({
         type: 'Today',
         singleDay: format(new Date(), 'yyyy-MM-dd'),
+        searchKey,
       });
     }
-  }, [salesType, productId?.today, dashboardOrderDay]);
+  }, [salesType, productId?.today, dashboardOrderDay, searchKey]);
 
   // Initial Load Month
   useEffect(() => {
@@ -168,23 +169,34 @@ const DashboardPage = () => {
     if (salesType === 'Month') {
       salesYearState.reset();
       salesDayState.reset();
-      createSalesMonth({ year: salesYear, productId: productId?.month });
+      createSalesMonth({
+        year: salesYear,
+        productId: productId?.month,
+        searchKey,
+      });
       createDashboardOrderSR({
         acroMonth: new Date().getMonth(),
         type: 'Month',
         year: new Date().getFullYear(),
+        searchKey,
       });
     }
-  }, [salesYear, salesType, productId?.month]);
+  }, [salesYear, salesType, productId?.month, searchKey]);
 
   // Initial Load Year
   useEffect(() => {
     if (salesType === 'Year' && yearRange?.start_year && yearRange?.end_year) {
       salesMonthState.reset();
       salesDayState.reset();
-      createSalesYear({ ...yearRange, productId: productId?.year });
+      createSalesYear({ ...yearRange, productId: productId?.year, searchKey });
     }
-  }, [salesType, yearRange?.start_year, yearRange?.end_year, productId?.year]);
+  }, [
+    salesType,
+    yearRange?.start_year,
+    yearRange?.end_year,
+    productId?.year,
+    searchKey,
+  ]);
 
   // On Collapse Filter Change
   useEffect(() => {
@@ -194,6 +206,7 @@ const DashboardPage = () => {
         type: 'Month',
         year: salesYear ?? 0,
         productId: dashboardOrdersMonth?.productId,
+        searchKey,
       });
     }
     if (salesType === 'Year') {
@@ -201,6 +214,7 @@ const DashboardPage = () => {
         type: 'Year',
         year: +(router?.query?.v as string) || new Date().getFullYear(),
         productId: dashboardOrdersYear?.productId,
+        searchKey,
       });
     }
     if (salesType === 'Today') {
@@ -209,6 +223,7 @@ const DashboardPage = () => {
         singleDay:
           (router?.query?.v as string) ?? format(new Date(), 'yyyy-MM-dd'),
         productId: dashboardOrderDay?.productId,
+        searchKey,
       });
     }
   }, [
@@ -219,6 +234,7 @@ const DashboardPage = () => {
     salesType,
     router?.query?.v,
     salesYear,
+    searchKey,
   ]);
 
   useEffect(() => {
@@ -235,10 +251,14 @@ const DashboardPage = () => {
     }
   }, [salesType]);
 
+  useEffect(() => {
+    setSearchKey('');
+  }, [salesType]);
+
   return (
     <>
       <Modal title="Sales Target" onClose={close} opened={opened}>
-        <SalesSettings
+        {/* <SalesSettings
           refetchReport={() => {
             if (salesType === 'Month') {
               salesYearState.reset();
@@ -250,7 +270,7 @@ const DashboardPage = () => {
               createSalesYear(yearRange);
             }
           }}
-        />
+        /> */}
       </Modal>
       <Tabs defaultValue="sales-report" variant="pills">
         <Paper className="p-1">

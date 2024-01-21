@@ -13,7 +13,11 @@ import OrderDetailsInfo from './OrderDetailsInfo';
 
 export type OrderTableShape = OrderSnapshot;
 
-const OrderSnapshotListTable = () => {
+type OrderSnapshotListTableProps = {
+  searchKey: string;
+};
+
+const OrderSnapshotListTable = ({ searchKey }: OrderSnapshotListTableProps) => {
   const {
     currentPage,
     handleNextPage,
@@ -28,8 +32,9 @@ const OrderSnapshotListTable = () => {
   const { data, isSuccess, isLoading, refetch, isFetching } =
     useGetAllGroupOrderQuery({
       currentPage,
-      showAll: false,
+      showAll: searchKey.length ? true : false,
       skip: numberTokip,
+      searchKey,
     });
 
   useEffect(() => {
@@ -104,7 +109,7 @@ const OrderSnapshotListTable = () => {
       <DataTable<OrderTableShape>
         columns={columns}
         isLoading={isLoading || isFetching}
-        data={data?.data?.ordersSnapshot}
+        data={data?.data?.ordersSnapshot ?? []}
       />
       <div className="flex items-center justify-between">
         <Pagination

@@ -1,6 +1,8 @@
 import {
   Box,
   Divider,
+  Group,
+  Image,
   Indicator,
   Loader,
   Paper,
@@ -9,7 +11,7 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { Product } from '@prisma/client';
-import { IconCup, IconShoppingBag } from '@tabler/icons-react';
+import { IconCup, IconPhotoSearch, IconShoppingBag } from '@tabler/icons-react';
 import { useContext } from 'react';
 import { CreateOrderContext } from './CreateOrderContextProvider';
 import { ProductWithCategory } from './helper/mapProductWithCategory';
@@ -70,7 +72,6 @@ const CreateOrderMenu = ({
                         key={product.id}
                         shadow="sm"
                         withBorder
-                        p="sm"
                         className={clsx([
                           'cursor-pointer',
                           {
@@ -85,15 +86,40 @@ const CreateOrderMenu = ({
                         component="a"
                         href={`#${product.id}`}
                       >
-                        <Title
-                          order={6}
-                          className="font-normal flex items-center"
-                        >
-                          <span>
-                            <IconCup color={colors.orange[5]} />
-                          </span>
-                          {product.name}
-                        </Title>
+                        <Group noWrap p={0}>
+                          {product.photo ? (
+                            <Image
+                              src={product.photo}
+                              alt={product.name}
+                              width={66}
+                              height={66}
+                              fit="cover"
+                              sx={{
+                                overflow: 'hidden',
+                              }}
+                            />
+                          ) : (
+                            <Box p="sm" pr={0}>
+                              <IconPhotoSearch
+                                size={35}
+                                color="gray"
+                                stroke={1.2}
+                              />
+                            </Box>
+                          )}
+
+                          <Box p="sm" pl={0}>
+                            <Title
+                              order={6}
+                              className="font-normal flex items-center"
+                            >
+                              <span>
+                                <IconCup color={colors.orange[5]} />
+                              </span>
+                              {product.name}
+                            </Title>
+                          </Box>
+                        </Group>
                       </Paper>
                     </Indicator>
                   );

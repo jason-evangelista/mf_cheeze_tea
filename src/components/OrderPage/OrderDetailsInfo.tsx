@@ -2,13 +2,15 @@ import {
   Badge,
   Box,
   Divider,
+  Group,
+  Image,
   List,
   Stack,
   Text,
   useMantineTheme,
 } from '@mantine/core';
 import { OrderSnapshot } from '@prisma/client';
-import { IconCup } from '@tabler/icons-react';
+import { IconCup, IconPhotoSearch } from '@tabler/icons-react';
 import { format } from 'date-fns';
 import { OrderCart } from '../CreateOrderPage/CreateOrderContextProvider';
 import PriceDisplay from '../common/PriceDisplay';
@@ -24,7 +26,6 @@ const OrderDetailsInfo = ({ orderSnapshot }: OrderDetailsInfoProps) => {
   const parseOrderSnapshot = JSON.parse(
     orderSnapshot?.snapshot_record
   ) as OrderCart[];
-  console.log({ orderSnapshot });
 
   return (
     <>
@@ -72,26 +73,52 @@ const OrderDetailsInfo = ({ orderSnapshot }: OrderDetailsInfoProps) => {
                 return (
                   <List.Item
                     key={item.orderProduct.id}
-                    icon={<IconCup color={colors.orange[5]} />}
+                    icon={
+                      item.orderProduct.photo ? (
+                        <Image
+                          width={100}
+                          height={100}
+                          alt={item.orderProduct.name}
+                          src={item.orderProduct.photo}
+                          fit="cover"
+                          sx={{
+                            borderRadius: 8,
+                            border: `1px solid ${colors.gray[3]}`,
+                            overflow: 'hidden',
+                          }}
+                        />
+                      ) : (
+                        <IconPhotoSearch size={80} color="gray" stroke={1.2} />
+                      )
+                    }
                   >
-                    <Text fw={500}>
-                      {item?.orderProduct?.name}
-                      {item?.regularSizeQuantity ? (
-                        <Badge color="teal" variant="outline">
-                          {regularSizeCount}
-                        </Badge>
-                      ) : null}
-                      {item?.largeSizeQuantity ? (
-                        <Badge color="teal" variant="outline">
-                          {largeSizeCount}
-                        </Badge>
-                      ) : null}
-                      {item?.fixedPriceQuantity ? (
-                        <Badge color="teal" variant="outline">
-                          {fixedSizeCount}
-                        </Badge>
-                      ) : null}
-                    </Text>
+                    <Stack spacing={0}>
+                      <Group noWrap align="center" spacing={0}>
+                        <IconCup color={colors.orange[5]} />
+                        <Text fw={500}>{item?.orderProduct?.name}</Text>
+                      </Group>
+                      <Text size="xs" mb={2} weight={500}>
+                        {item.orderProduct?.type}
+                      </Text>
+
+                      <Group spacing="xs">
+                        {item?.regularSizeQuantity ? (
+                          <Badge color="teal" variant="outline" w={100}>
+                            {regularSizeCount}
+                          </Badge>
+                        ) : null}
+                        {item?.largeSizeQuantity ? (
+                          <Badge color="teal" variant="outline" w={100}>
+                            {largeSizeCount}
+                          </Badge>
+                        ) : null}
+                        {item?.fixedPriceQuantity ? (
+                          <Badge color="teal" variant="outline" w={100}>
+                            {fixedSizeCount}
+                          </Badge>
+                        ) : null}
+                      </Group>
+                    </Stack>
                   </List.Item>
                 );
               })}

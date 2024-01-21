@@ -11,7 +11,6 @@ type BodyResponse = {
 type ModOrder = Omit<Order, 'created_at' | 'status' | 'id' | 'updated_at'>;
 
 const createOrderApi = async (req: NextApiRequest, res: NextApiResponse) => {
-  console.log(req.body);
   try {
     if (req.method === 'POST') {
       const {

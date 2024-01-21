@@ -101,7 +101,6 @@ const CreateOrderContextProvider = ({ children }: CreateOrderProviderProps) => {
     const calcoverAllTotal = orderCart.reduce((prev, cur) => {
       let holdValue = 0;
       if (cur?.largeSizeQuantity && cur?.orderProduct?.large_size_amount) {
-        console.log(cur?.largeSizeQuantity);
         holdValue +=
           cur?.orderProduct?.large_size_amount * cur?.largeSizeQuantity;
       }
@@ -117,7 +116,6 @@ const CreateOrderContextProvider = ({ children }: CreateOrderProviderProps) => {
 
       return prev + holdValue;
     }, 0);
-    console.log(calcoverAllTotal);
     setOverAllTotal(calcoverAllTotal);
   }, [orderCart]);
 

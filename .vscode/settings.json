@@ -5,6 +5,7 @@
   "tailwindCSS.classAttributes": [
     "class",
     "className",
+    "classNames",
     "ngClass",
     "mainContainerClassName"
   ],
@@ -21,5 +22,9 @@
       "username": "mfcheezetea",
       "database": "mf-cheeze-tea"
     }
-  ]
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
+  }
 }

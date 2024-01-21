@@ -22,7 +22,9 @@ const orderApiService = baseApi.injectEndpoints({
       }
     >({
       query: (query) => ({
-        url: `/order?currentPage=${query.currentPage}&skip=${query.skip}&showAll=${query.showAll}&searchKey=${query.searchKey}`,
+        url: `/order?${new URLSearchParams(
+          query as unknown as Record<string, string>
+        )}`,
       }),
       keepUnusedDataFor: 1,
       providesTags: ['Order'],
@@ -43,10 +45,12 @@ const orderApiService = baseApi.injectEndpoints({
       }
     >({
       query: (query) => ({
-        url: `/group-order?currentPage=${query.currentPage}&skip=${query.skip}&showAll=${query.showAll}&searchKey=${query.searchKey}`,
+        url: `/group-order?${new URLSearchParams(
+          query as unknown as Record<string, string>
+        )}`,
       }),
       keepUnusedDataFor: 1,
-      providesTags: ['Group Order'],
+      providesTags: ['Group Order', 'Order'],
     }),
     createOrder: builder.mutation<BaseSuccessResponse, OrderSchema>({
       query: (body) => ({

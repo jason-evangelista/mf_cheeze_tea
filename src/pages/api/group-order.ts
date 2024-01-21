@@ -7,16 +7,21 @@ const groupOrderApi = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'GET') {
       const query = req.query as TableProps;
 
-      if (query.showAll === 'true' && !req.query.id) {
+      if (query.showAll === 'true') {
         const getAllOrderSnapshot = await prismaClient.orderSnapshot.findMany({
           where: {
             status: 'ACTIVE',
+            ...(query.searchKey && {
+              customer_name: {
+                search: query.searchKey.toLowerCase().concat('*'),
+              },
+            }),
           },
         });
 
         return res.status(200).json({
           message: 'Succesfully fetched all group orders',
-          data: { orderSnaphot: getAllOrderSnapshot },
+          data: { ordersSnapshot: getAllOrderSnapshot },
         });
       }
 

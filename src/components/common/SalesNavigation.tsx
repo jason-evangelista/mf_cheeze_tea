@@ -75,6 +75,7 @@ const SalesNavigation = () => {
           alt="Macee Float Cheeze Tea"
           width={120}
           style={{ objectFit: 'cover' }}
+          priority
         />
       </div>
     </nav>

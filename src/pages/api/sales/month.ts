@@ -1,5 +1,6 @@
 import { parseDate, transformSalesMonth } from '@/constants/salesDates';
 import calculateSalesByMonth from '@/utils/calculateSales';
+import includeSearchKey from '@/utils/includeSearchKey';
 import { prismaClient } from '@/utils/prismaClient';
 import { sub } from 'date-fns';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -7,7 +8,11 @@ import { NextApiRequest, NextApiResponse } from 'next';
 const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'POST') {
-      const body = req.body as { year: number; productId?: string };
+      const body = req.body as {
+        year: number;
+        productId?: string;
+        searchKey: string;
+      };
       const date = transformSalesMonth(body.year);
       const prevDateYear = transformSalesMonth(body.year - 1);
 
@@ -18,7 +23,7 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       });
 
-      const [Jan, Feb, Mar, Apr, May, June, July, Aug, Sep, Oct, Nov] =
+      const [Jan, Feb, Mar, Apr, May, June, July, Aug, Sep, Oct, Nov, Dec] =
         await Promise.all([
           await prismaClient.order.findMany({
             where: {
@@ -26,11 +31,7 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Jan?.start),
                 lte: parseDate(date?.Jan?.end),
               },
-              ...(body.productId && {
-                AND: {
-                  product_id: body.productId,
-                },
-              }),
+              ...(body.searchKey && includeSearchKey(body.searchKey)),
             },
           }),
           await prismaClient.order.findMany({
@@ -39,11 +40,7 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Feb?.start),
                 lte: parseDate(date?.Feb?.end),
               },
-              ...(body.productId && {
-                AND: {
-                  product_id: body.productId,
-                },
-              }),
+              ...(body.searchKey && includeSearchKey(body.searchKey)),
             },
           }),
           await prismaClient.order.findMany({
@@ -52,11 +49,7 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Mar?.start),
                 lte: parseDate(date?.Mar?.end),
               },
-              ...(body.productId && {
-                AND: {
-                  product_id: body.productId,
-                },
-              }),
+              ...(body.searchKey && includeSearchKey(body.searchKey)),
             },
           }),
           await prismaClient.order.findMany({
@@ -65,11 +58,7 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Apr?.start),
                 lte: parseDate(date?.Apr?.end),
               },
-              ...(body.productId && {
-                AND: {
-                  product_id: body.productId,
-                },
-              }),
+              ...(body.searchKey && includeSearchKey(body.searchKey)),
             },
           }),
           await prismaClient.order.findMany({
@@ -78,11 +67,7 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.May?.start),
                 lte: parseDate(date?.May?.end),
               },
-              ...(body.productId && {
-                AND: {
-                  product_id: body.productId,
-                },
-              }),
+              ...(body.searchKey && includeSearchKey(body.searchKey)),
             },
           }),
           await prismaClient.order.findMany({
@@ -91,11 +76,7 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.June?.start),
                 lte: parseDate(date?.June?.end),
               },
-              ...(body.productId && {
-                AND: {
-                  product_id: body.productId,
-                },
-              }),
+              ...(body.searchKey && includeSearchKey(body.searchKey)),
             },
           }),
           await prismaClient.order.findMany({
@@ -104,11 +85,7 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.July?.start),
                 lte: parseDate(date?.July?.end),
               },
-              ...(body.productId && {
-                AND: {
-                  product_id: body.productId,
-                },
-              }),
+              ...(body.searchKey && includeSearchKey(body.searchKey)),
             },
           }),
           await prismaClient.order.findMany({
@@ -117,11 +94,7 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Aug?.start),
                 lte: parseDate(date?.Aug?.end),
               },
-              ...(body.productId && {
-                AND: {
-                  product_id: body.productId,
-                },
-              }),
+              ...(body.searchKey && includeSearchKey(body.searchKey)),
             },
           }),
           await prismaClient.order.findMany({
@@ -130,11 +103,7 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Sep?.start),
                 lte: parseDate(date?.Sep?.end),
               },
-              ...(body.productId && {
-                AND: {
-                  product_id: body.productId,
-                },
-              }),
+              ...(body.searchKey && includeSearchKey(body.searchKey)),
             },
           }),
           await prismaClient.order.findMany({
@@ -143,11 +112,7 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Oct?.start),
                 lte: parseDate(date?.Oct?.end),
               },
-              ...(body.productId && {
-                AND: {
-                  product_id: body.productId,
-                },
-              }),
+              ...(body.searchKey && includeSearchKey(body.searchKey)),
             },
           }),
           await prismaClient.order.findMany({
@@ -156,11 +121,7 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Nov?.start),
                 lte: parseDate(date?.Nov?.end),
               },
-              ...(body.productId && {
-                AND: {
-                  product_id: body.productId,
-                },
-              }),
+              ...(body.searchKey && includeSearchKey(body.searchKey)),
             },
           }),
           await prismaClient.order.findMany({
@@ -169,11 +130,7 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 gte: parseDate(date?.Dec?.start),
                 lte: parseDate(date?.Dec?.end),
               },
-              ...(body.productId && {
-                AND: {
-                  product_id: body.productId,
-                },
-              }),
+              ...(body.searchKey && includeSearchKey(body.searchKey)),
             },
           }),
         ]);
@@ -184,11 +141,7 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
             gte: parseDate(prevDateYear?.Dec?.start),
             lte: parseDate(prevDateYear?.Dec?.end),
           },
-          ...(body.productId && {
-            AND: {
-              product_id: body.productId,
-            },
-          }),
+          ...(body.searchKey && includeSearchKey(body.searchKey)),
         },
       });
 
@@ -198,11 +151,7 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
             gte: sub(parseDate(prevDateYear?.Dec?.start), { months: 1 }),
             lte: sub(parseDate(prevDateYear?.Dec?.end), { months: 1 }),
           },
-          ...(body.productId && {
-            AND: {
-              product_id: body.productId,
-            },
-          }),
+          ...(body.searchKey && includeSearchKey(body.searchKey)),
         },
       });
 
@@ -213,24 +162,26 @@ const salesMonthApi = async (req: NextApiRequest, res: NextApiResponse) => {
             prevMonthDecYear,
             'Jan',
             findSalesTarget,
-            stepBehindNov
+            stepBehindNov,
+            Jan
           ),
           Feb: calculateSalesByMonth(
             Jan,
             'Feb',
             findSalesTarget,
-            prevMonthDecYear
+            prevMonthDecYear,
+            Feb
           ),
-          Mar: calculateSalesByMonth(Feb, 'Mar', findSalesTarget, Jan),
-          Apr: calculateSalesByMonth(Mar, 'Apr', findSalesTarget, Feb),
-          May: calculateSalesByMonth(Apr, 'May', findSalesTarget, Mar),
-          June: calculateSalesByMonth(May, 'June', findSalesTarget, Apr),
-          July: calculateSalesByMonth(June, 'July', findSalesTarget, May),
-          Aug: calculateSalesByMonth(July, 'Aug', findSalesTarget, June),
-          Sep: calculateSalesByMonth(Aug, 'Sep', findSalesTarget, July),
-          Oct: calculateSalesByMonth(Sep, 'Oct', findSalesTarget, Aug),
-          Nov: calculateSalesByMonth(Oct, 'Nov', findSalesTarget, Sep),
-          Dec: calculateSalesByMonth(Nov, 'Dec', findSalesTarget, Oct),
+          Mar: calculateSalesByMonth(Feb, 'Mar', findSalesTarget, Jan, Mar),
+          Apr: calculateSalesByMonth(Mar, 'Apr', findSalesTarget, Feb, Apr),
+          May: calculateSalesByMonth(Apr, 'May', findSalesTarget, Mar, May),
+          June: calculateSalesByMonth(May, 'June', findSalesTarget, Apr, June),
+          July: calculateSalesByMonth(June, 'July', findSalesTarget, May, July),
+          Aug: calculateSalesByMonth(July, 'Aug', findSalesTarget, June, Aug),
+          Sep: calculateSalesByMonth(Aug, 'Sep', findSalesTarget, July, Sep),
+          Oct: calculateSalesByMonth(Sep, 'Oct', findSalesTarget, Aug, Oct),
+          Nov: calculateSalesByMonth(Oct, 'Nov', findSalesTarget, Sep, Nov),
+          Dec: calculateSalesByMonth(Nov, 'Dec', findSalesTarget, Oct, Dec),
         },
       });
     }

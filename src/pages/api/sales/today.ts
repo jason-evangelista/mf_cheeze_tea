@@ -1,4 +1,5 @@
 import { calculateSalesByDay } from '@/utils/calculateSales';
+import includeSearchKey from '@/utils/includeSearchKey';
 import { prismaClient } from '@/utils/prismaClient';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -9,6 +10,7 @@ const salesTodayApi = async (req: NextApiRequest, res: NextApiResponse) => {
         start_date: string;
         end_date: string;
         productId?: string;
+        searchKey: string;
       };
 
       const startDate = new Date(body?.start_date);
@@ -16,9 +18,7 @@ const salesTodayApi = async (req: NextApiRequest, res: NextApiResponse) => {
 
       const getOrder = await prismaClient.order.findMany({
         where: {
-          ...(body.productId && {
-            product_id: body?.productId,
-          }),
+          ...(body.searchKey && includeSearchKey(body.searchKey)),
           order_date: {
             gte: new Date(startDate),
             lte: new Date(endtDate),

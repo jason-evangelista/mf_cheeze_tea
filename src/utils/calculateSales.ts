@@ -5,7 +5,8 @@ const calculateSalesByMonth = (
   month: Order[],
   label: string,
   salesTarget: SalesTarget[],
-  prevMonth: Order[]
+  prevMonth: Order[],
+  realCurrentMonth: Order[]
 ) => {
   const currentMonthSales = month.reduce(
     (prev, { sub_total }) => prev + sub_total,
@@ -19,8 +20,12 @@ const calculateSalesByMonth = (
 
   const salesNextTarget = currentMonthSales + growthRate * currentMonthSales;
 
+
   return {
-    actual_sales: month.reduce((prev, { sub_total }) => prev + sub_total, 0),
+    actual_sales: realCurrentMonth.reduce(
+      (prev, { sub_total }) => prev + sub_total,
+      0
+    ),
     label,
     sales_target:
       salesNextTarget.toFixed(0) === 'Infinity'
@@ -43,8 +48,6 @@ export const calculateSalesByYear = async (
     const findItem = data?.filter(
       (item) => !item.order_date.toISOString().search(year.toString())
     );
-
-    console.log({ findItem });
 
     const currentYearSales = findItem.reduce(
       (prev, { sub_total }) => prev + sub_total,
@@ -79,8 +82,6 @@ export const calculateSalesByYear = async (
     };
   }, {});
 
-  console.log({ divideItemByYear });
-
   return divideItemByYear;
 };
 
@@ -109,8 +110,6 @@ export const calculateSalesByDay = async (
       },
     };
   }, {});
-
-  console.log({ salesByDay });
 
   return salesByDay;
 };

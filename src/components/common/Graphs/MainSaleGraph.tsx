@@ -42,9 +42,9 @@ export type MainSaleGraphProps = {
 };
 
 const domain = {
-  Month: [0, 20000],
+  Month: [0, 50000],
   Year: [0, 100000],
-  Today: [0, 5000],
+  Today: [0, 10000],
   tickMonth: 10,
   tickYear: 15,
 };
@@ -68,7 +68,7 @@ const MainSaleGraph = ({
     currentPage: 0,
     showAll: true,
     skip: 0,
-    searchKey: undefined,
+    searchKey: '',
   });
 
   const memoData = useMemo(() => {
@@ -78,8 +78,6 @@ const MainSaleGraph = ({
       name: item[1].label,
     }));
   }, [data, salesType]);
-
-  console.log({ data });
 
   return (
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
@@ -117,7 +115,7 @@ const MainSaleGraph = ({
         {chart === 'Line' && (
           <ResponsiveContainer
             width="100%"
-            height={300}
+            height={450}
             className="text-[11px] cursor-pointer"
           >
             {memoData.length ? (
@@ -200,7 +198,7 @@ const MainSaleGraph = ({
         {chart === 'Bar' && (
           <ResponsiveContainer
             width="100%"
-            height={300}
+            height={450}
             className="text-[11px] cursor-pointer"
           >
             {memoData.length ? (
@@ -273,7 +271,7 @@ const MainSaleGraph = ({
         {chart === 'Line Filled' && (
           <ResponsiveContainer
             width="100%"
-            height={300}
+            height={450}
             className="text-[11px] cursor-pointer"
           >
             {memoData.length ? (

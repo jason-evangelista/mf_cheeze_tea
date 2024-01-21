@@ -78,6 +78,9 @@ const CreateOrderPage = () => {
             </Text>
           </div>
         }
+        classNames={{
+          body: 'p-0',
+        }}
       >
         {selectedProduct && (
           <ProductOrderModal

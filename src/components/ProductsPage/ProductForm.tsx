@@ -6,8 +6,19 @@ import {
 } from '@/services/productService';
 import { parseErrorResponse } from '@/utils/parseErrorResponse';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Button, Select, TextInput } from '@mantine/core';
+import {
+  Button,
+  Group,
+  Image,
+  Select,
+  Stack,
+  Text,
+  TextInput,
+  useMantineTheme,
+} from '@mantine/core';
+import { Dropzone, FileWithPath, MIME_TYPES } from '@mantine/dropzone';
 import { notifications } from '@mantine/notifications';
+import { IconPhoto, IconUpload, IconX } from '@tabler/icons-react';
 import { memo, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
@@ -22,9 +33,11 @@ const ProductForm = ({
   handleClose,
   initialValue,
 }: ProductFormProps) => {
+  const theme = useMantineTheme();
   const {
     register,
     handleSubmit,
+    setValue,
     setError,
     control,
     clearErrors,
@@ -44,6 +57,20 @@ const ProductForm = ({
   const watchLZAmount = watch('large_size_amount');
   const watchRZdAmount = watch('regular_size_amount');
   const watchProductType = watch('product_type');
+  const watchProductPhoto = watch('product_photo');
+
+  const handleOndropImage = async (_files: FileWithPath[]) => {
+    const fileReader = new FileReader();
+    fileReader.readAsDataURL(_files[0]);
+
+    fileReader.onload = () => {
+      setValue('product_photo', fileReader.result as string);
+    };
+  };
+
+  const handleResetPhoto = () => {
+    setValue('product_photo', '');
+  };
 
   const handleMutateProduct = async (payload: ProductSchema) => {
     if (watchLZAmount && watchRZdAmount && watchFixedAmount) {
@@ -157,6 +184,62 @@ const ProductForm = ({
           )}
         />
       </div>
+      <Stack mt="sm" spacing="xs" pos="relative">
+        <Text size="sm" weight={600}>
+          Product Photo <span>(Optional)</span>
+        </Text>
+        <Dropzone
+          multiple={false}
+          onDrop={handleOndropImage}
+          onReject={(files) => console.log('reject', { files })}
+          maxSize={3 * 1024 ** 2}
+          accept={[MIME_TYPES.png, MIME_TYPES.jpeg, MIME_TYPES.webp]}
+        >
+          <Group position="center" noWrap>
+            <Dropzone.Accept>
+              <IconUpload size={50} stroke={1.5} />
+            </Dropzone.Accept>
+            <Dropzone.Reject>
+              <IconX size={50} stroke={1.5} />
+            </Dropzone.Reject>
+            <Dropzone.Idle>
+              <IconPhoto size={50} stroke={1.5} />
+            </Dropzone.Idle>
+            <div>
+              <Text size="xs" inline>
+                Drag images here or click to select files
+              </Text>
+              <Text size="xs" color="dimmed" inline mt={7}>
+                Attach as many files as you like, each file should not exceed
+                3mb. <strong>Accepted file (png, jpg, jpeg, webp)</strong>
+              </Text>
+            </div>
+          </Group>
+        </Dropzone>
+        {watchProductPhoto && (
+          <>
+            <Button
+              size="xs"
+              color="red"
+              variant="light"
+              onClick={handleResetPhoto}
+            >
+              Reset photo
+            </Button>
+            <Image
+              src={watchProductPhoto}
+              alt="product image"
+              width={300}
+              fit="scale-down"
+              sx={{
+                borderRadius: 8,
+                border: `1px solid ${theme.colors.gray[3]}`,
+                overflow: 'hidden',
+              }}
+            />
+          </>
+        )}
+      </Stack>
 
       <Button
         type="submit"

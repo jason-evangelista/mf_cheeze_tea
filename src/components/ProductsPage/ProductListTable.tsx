@@ -9,21 +9,35 @@ import { Product } from '@prisma/client';
 import { createColumnHelper } from '@tanstack/react-table';
 import { useEffect, useMemo, useState } from 'react';
 
-import { Button } from '@mantine/core';
+import {
+  Button,
+  Image,
+  Popover,
+  Tooltip,
+  useMantineTheme,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconEdit, IconTrash } from '@tabler/icons-react';
+import { IconEdit, IconPhotoSearch, IconTrash } from '@tabler/icons-react';
 import DeleteModal from '../common/DeleteModal';
 import PriceDisplay from '../common/PriceDisplay';
 import DataTable from '../common/Tables/DataTable';
 import Pagination from '../common/Tables/Pagination';
 
 export type ProductListTableProps = {
-  // eslint-disable-next-line no-unused-vars
-  handleGetProductInfo: (payload: ProductSchema & { id: string }) => void;
+  handleGetProductInfo: (
+    // eslint-disable-next-line no-unused-vars
+    payload: ProductSchema & { id: string; product_photo?: string }
+  ) => void;
+  searchKey: string;
 };
 type ProductDataTableShape = Product;
 
-const ProductListTable = ({ handleGetProductInfo }: ProductListTableProps) => {
+const ProductListTable = ({
+  handleGetProductInfo,
+  searchKey,
+}: ProductListTableProps) => {
+  const theme = useMantineTheme();
+
   const {
     currentPage,
     handleNextPage,
@@ -37,7 +51,8 @@ const ProductListTable = ({ handleGetProductInfo }: ProductListTableProps) => {
     useGetAllProductQuery({
       currentPage,
       skip: numberTokip,
-      showAll: false,
+      showAll: searchKey.length ? true : false,
+      searchKey,
     });
 
   const [opened, { open, close }] = useDisclosure(false);
@@ -51,6 +66,54 @@ const ProductListTable = ({ handleGetProductInfo }: ProductListTableProps) => {
   const columnHelper = createColumnHelper<ProductDataTableShape>();
   const columns = useMemo(
     () => [
+      columnHelper.accessor('photo', {
+        header: () => <span>Product Preview</span>,
+        cell: (data) => {
+          return (
+            <>
+              {data.getValue() ? (
+                <Popover width={200} position="right" withArrow>
+                  <Popover.Target>
+                    <Tooltip
+                      label="Click photo to see preview"
+                      position="bottom"
+                      withArrow
+                      sx={{ fontSize: 12 }}
+                    >
+                      <Image
+                        width={60}
+                        height={60}
+                        alt={data.row.original.name}
+                        src={data.getValue()}
+                        fit="cover"
+                        sx={{
+                          borderRadius: 8,
+                          border: `1px solid ${theme.colors.gray[3]}`,
+                          overflow: 'hidden',
+                        }}
+                      />
+                    </Tooltip>
+                  </Popover.Target>
+                  <Popover.Dropdown>
+                    <Image
+                      alt={data.row.original.name}
+                      src={data.getValue()}
+                      fit="contain"
+                      sx={{
+                        borderRadius: 8,
+                        border: `1px solid ${theme.colors.gray[3]}`,
+                        overflow: 'hidden',
+                      }}
+                    />
+                  </Popover.Dropdown>
+                </Popover>
+              ) : (
+                <IconPhotoSearch size={35} color="gray" stroke={1.2} />
+              )}
+            </>
+          );
+        },
+      }),
       columnHelper.accessor('name', {
         cell: (data) => data.getValue(),
         header: () => <span>Product Name</span>,
@@ -87,6 +150,7 @@ const ProductListTable = ({ handleGetProductInfo }: ProductListTableProps) => {
                     regular_size_amount,
                     type,
                     id,
+                    photo,
                   } = data.row.original;
                   handleGetProductInfo({
                     product_name: name,
@@ -94,6 +158,7 @@ const ProductListTable = ({ handleGetProductInfo }: ProductListTableProps) => {
                     fixed_amount: fixed_amount ?? 0,
                     large_size_amount: large_size_amount ?? 0,
                     regular_size_amount: regular_size_amount ?? 0,
+                    product_photo: photo ?? '',
                     id,
                   });
                 }}

@@ -33,6 +33,8 @@ model Product {
   regular_size_amount Int?
   fixed_amount        Int?
   type                ProductType
+  photo               String?
+  photo_asset_id      String?
   status              Status      @default(ACTIVE)
   created_at          DateTime    @default(now())
   updated_at          DateTime    @updatedAt
@@ -70,6 +72,7 @@ model OrderSnapshot {
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 
+  @@fulltext([customer_name])
   @@map("order_snapshots")
 }
 

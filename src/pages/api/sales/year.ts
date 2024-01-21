@@ -1,5 +1,6 @@
 import { parseDate, transformSalesMonth } from '@/constants/salesDates';
 import { calculateSalesByYear } from '@/utils/calculateSales';
+import includeSearchKey from '@/utils/includeSearchKey';
 import { prismaClient } from '@/utils/prismaClient';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -10,6 +11,7 @@ const salesYearApi = async (req: NextApiRequest, res: NextApiResponse) => {
         start_year: number;
         end_year: number;
         productId: string;
+        searchKey: string;
       };
       const startDate = transformSalesMonth(body.start_year - 1);
       const endDate = transformSalesMonth(body.end_year - 1);
@@ -27,9 +29,7 @@ const salesYearApi = async (req: NextApiRequest, res: NextApiResponse) => {
             gte: parseDate(startDate.Jan.start),
             lte: parseDate(endDate.Dec.end),
           },
-          ...(body?.productId && {
-            product_id: body?.productId,
-          }),
+          ...(body.searchKey && includeSearchKey(body.searchKey)),
         },
       });
 
