@@ -44,6 +44,12 @@ const orderApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 },
               },
             }),
+            ...(query.orderDate && {
+              order_date: {
+                gt: new Date(query.orderDate),
+                lt: add(new Date(query.orderDate), { days: 1 }),
+              },
+            }),
           },
           include: {
             product: {

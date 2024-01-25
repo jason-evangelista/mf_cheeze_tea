@@ -1,8 +1,17 @@
 import useToggleContainer from '@/hooks/useToggleContainer';
 import { SearchContext } from '@/providers/SearchProvider';
-import { Button, Modal, Paper, Tabs, Text, TextInput } from '@mantine/core';
+import {
+  Button,
+  Group,
+  Modal,
+  Paper,
+  Tabs,
+  Text,
+  TextInput,
+} from '@mantine/core';
+import { DatePickerInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
-import { IconPlus, IconSearch } from '@tabler/icons-react';
+import { IconCalendar, IconPlus, IconSearch } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useContext, useState } from 'react';
 import OrderForm from './OrderForm';
@@ -12,7 +21,8 @@ import OrderSnapshotListTable from './OrderSnapshotListTable';
 type TabOrder = 'group-order' | 'single-order';
 
 const OrderPage = () => {
-  const { setSearchKey, watchSearcKey, searchKey } = useContext(SearchContext);
+  const { setSearchKey, watchSearcKey, searchKey, setOrderDate, orderDate } =
+    useContext(SearchContext);
 
   const [isProductSelected, setIsProductSelected] = useState(false);
   const { isOpen, handleToggle } = useToggleContainer();
@@ -47,15 +57,24 @@ const OrderPage = () => {
         />
       </Modal>
       <div className="flex justify-between">
-        <TextInput
-          value={watchSearcKey}
-          icon={<IconSearch size={16} />}
-          placeholder={`Search ${
-            tabOrder === 'group-order' ? 'customer' : 'product'
-          } name`}
-          w={300}
-          onChange={(e) => setSearchKey(e.currentTarget.value)}
-        />
+        <Group>
+          <TextInput
+            value={watchSearcKey}
+            icon={<IconSearch size={16} />}
+            placeholder={`Search ${
+              tabOrder === 'group-order' ? 'customer' : 'product'
+            } name`}
+            w={300}
+            onChange={(e) => setSearchKey(e.currentTarget.value)}
+          />
+          <DatePickerInput
+            clearable
+            placeholder="Select order date"
+            w={250}
+            icon={<IconCalendar size={16} />}
+            onChange={(e) => setOrderDate(e?.toLocaleDateString() ?? '')}
+          />
+        </Group>
 
         <Link href="/create-order">
           <Button
@@ -85,12 +104,15 @@ const OrderPage = () => {
         </Tabs.List>
         <Tabs.Panel value="group-order">
           {tabOrder === 'group-order' && (
-            <OrderSnapshotListTable searchKey={searchKey} />
+            <OrderSnapshotListTable
+              searchKey={searchKey}
+              orderDate={orderDate}
+            />
           )}
         </Tabs.Panel>
         <Tabs.Panel value="single-order">
           {tabOrder === 'single-order' && (
-            <OrderListTable searchKey={searchKey} />
+            <OrderListTable searchKey={searchKey} orderDate={orderDate} />
           )}
         </Tabs.Panel>
       </Tabs>

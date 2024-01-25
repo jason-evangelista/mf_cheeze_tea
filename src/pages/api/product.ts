@@ -85,6 +85,11 @@ const productApi = async (req: NextApiRequest, res: NextApiResponse) => {
                 search: query.searchKey.toLowerCase().concat('*'),
               },
             }),
+            ...(query.productType && {
+              type: {
+                equals: query.productType,
+              },
+            }),
           },
         });
         return res.status(200).json({

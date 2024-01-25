@@ -1,11 +1,13 @@
 import { TableProps } from '@/types/TableProps';
 import { prismaClient } from '@/utils/prismaClient';
+import { add } from 'date-fns';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const groupOrderApi = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'GET') {
       const query = req.query as TableProps;
+
 
       if (query.showAll === 'true') {
         const getAllOrderSnapshot = await prismaClient.orderSnapshot.findMany({
@@ -14,6 +16,13 @@ const groupOrderApi = async (req: NextApiRequest, res: NextApiResponse) => {
             ...(query.searchKey && {
               customer_name: {
                 search: query.searchKey.toLowerCase().concat('*'),
+              },
+            }),
+
+            ...(query.orderDate && {
+              order_date: {
+                gt: new Date(query.orderDate),
+                lt: add(new Date(query.orderDate), { days: 1 }),
               },
             }),
           },

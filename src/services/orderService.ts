@@ -19,6 +19,7 @@ const orderApiService = baseApi.injectEndpoints({
         skip: number;
         showAll: boolean;
         searchKey?: string;
+        orderDate: string;
       }
     >({
       query: (query) => ({
@@ -42,6 +43,7 @@ const orderApiService = baseApi.injectEndpoints({
         skip: number;
         showAll: boolean;
         searchKey?: string;
+        orderDate: string;
       }
     >({
       query: (query) => ({

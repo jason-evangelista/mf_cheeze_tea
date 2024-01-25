@@ -16,9 +16,10 @@ export type OrderTableShape = Order & {
 
 type OrderListTableProps = {
   searchKey: string;
+  orderDate: string;
 };
 
-const OrderListTable = ({ searchKey }: OrderListTableProps) => {
+const OrderListTable = ({ searchKey, orderDate }: OrderListTableProps) => {
   const theme = useMantineTheme();
   const {
     currentPage,
@@ -31,9 +32,10 @@ const OrderListTable = ({ searchKey }: OrderListTableProps) => {
   const { data, isSuccess, isLoading, refetch, isFetching } =
     useGetAllOrderQuery({
       currentPage,
-      showAll: searchKey.length ? true : false,
+      showAll: orderDate.length || searchKey.length ? true : false,
       skip: numberTokip,
       searchKey,
+      orderDate,
     });
 
   useEffect(() => {

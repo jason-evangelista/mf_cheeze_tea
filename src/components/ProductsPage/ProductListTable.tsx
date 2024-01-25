@@ -29,12 +29,14 @@ export type ProductListTableProps = {
     payload: ProductSchema & { id: string; product_photo?: string }
   ) => void;
   searchKey: string;
+  productFilterType: string;
 };
 type ProductDataTableShape = Product;
 
 const ProductListTable = ({
   handleGetProductInfo,
   searchKey,
+  productFilterType,
 }: ProductListTableProps) => {
   const theme = useMantineTheme();
 
@@ -51,8 +53,9 @@ const ProductListTable = ({
     useGetAllProductQuery({
       currentPage,
       skip: numberTokip,
-      showAll: searchKey.length ? true : false,
+      showAll: productFilterType.length || searchKey.length ? true : false,
       searchKey,
+      productType: productFilterType,
     });
 
   const [opened, { open, close }] = useDisclosure(false);

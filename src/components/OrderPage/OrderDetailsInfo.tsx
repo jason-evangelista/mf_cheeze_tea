@@ -14,6 +14,7 @@ import { IconCup, IconPhotoSearch } from '@tabler/icons-react';
 import { format } from 'date-fns';
 import { OrderCart } from '../CreateOrderPage/CreateOrderContextProvider';
 import PriceDisplay from '../common/PriceDisplay';
+import OrderSnapShotReceipt from './OrderSnapShotReceipt';
 
 type OrderDetailsInfoProps = {
   orderSnapshot?: OrderSnapshot;
@@ -29,8 +30,10 @@ const OrderDetailsInfo = ({ orderSnapshot }: OrderDetailsInfoProps) => {
 
   return (
     <>
+      {orderSnapshot && <OrderSnapShotReceipt orderSnapShot={orderSnapshot} />}
+
       {orderSnapshot && (
-        <Stack spacing="xs">
+        <Stack spacing="xs" pos="relative">
           <Divider />
           <Box>
             <Badge variant="light">Customer Name</Badge>
@@ -58,7 +61,7 @@ const OrderDetailsInfo = ({ orderSnapshot }: OrderDetailsInfoProps) => {
             <Badge>Order Date</Badge>
             <Text fw={600}>
               {format(
-                new Date(orderSnapshot?.created_at),
+                new Date(orderSnapshot?.order_date),
                 'dd, MMMM yyyy - hh:mm a'
               )}
             </Text>

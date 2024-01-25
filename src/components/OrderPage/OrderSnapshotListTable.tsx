@@ -1,6 +1,6 @@
 import usePagination from '@/hooks/usePagination';
 import { useGetAllGroupOrderQuery } from '@/services/orderService';
-import { Button, Drawer, Text } from '@mantine/core';
+import { Button, Drawer, ScrollArea, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { OrderSnapshot } from '@prisma/client';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -15,9 +15,13 @@ export type OrderTableShape = OrderSnapshot;
 
 type OrderSnapshotListTableProps = {
   searchKey: string;
+  orderDate: string;
 };
 
-const OrderSnapshotListTable = ({ searchKey }: OrderSnapshotListTableProps) => {
+const OrderSnapshotListTable = ({
+  searchKey,
+  orderDate,
+}: OrderSnapshotListTableProps) => {
   const {
     currentPage,
     handleNextPage,
@@ -32,9 +36,10 @@ const OrderSnapshotListTable = ({ searchKey }: OrderSnapshotListTableProps) => {
   const { data, isSuccess, isLoading, refetch, isFetching } =
     useGetAllGroupOrderQuery({
       currentPage,
-      showAll: searchKey.length ? true : false,
+      showAll: orderDate.length || searchKey.length ? true : false,
       skip: numberTokip,
       searchKey,
+      orderDate,
     });
 
   useEffect(() => {
@@ -103,6 +108,11 @@ const OrderSnapshotListTable = ({ searchKey }: OrderSnapshotListTableProps) => {
         onClose={close}
         position="right"
         size="md"
+        classNames={{
+          content: 'overflow-hidden',
+          body: 'overflow-y-auto',
+        }}
+        scrollAreaComponent={ScrollArea.Autosize}
       >
         <OrderDetailsInfo orderSnapshot={orderSnapshot} />
       </Drawer>

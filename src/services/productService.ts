@@ -29,6 +29,7 @@ const productApiService = baseApi.injectEndpoints({
         skip: number;
         showAll: boolean;
         searchKey?: string;
+        productType: string;
       }
     >({
       query: (query) => ({
