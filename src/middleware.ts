@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { useGetSession as getSession } from './utils/useGetSession';
 
 export async function middleware(req: NextRequest) {
+  const isMaintenance = process.env.MAINTENANCE ?? '';
+  console.log({ isMaintenance });
   const res = NextResponse.next();
+  
+  if (isMaintenance === '1') {
+    return NextResponse.redirect(new URL('/m', req.url));
+  }
 
   const getCookie = req.cookies.get(process.env.NEXT_PUBLIC_COOKIE_NAME ?? '');
   const pathname = req.nextUrl.pathname;
