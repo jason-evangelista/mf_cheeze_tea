@@ -1,5 +1,6 @@
 import { TableProps } from '@/types/TableProps';
 import { prismaClient } from '@/utils/prismaClient';
+import { add } from 'date-fns';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const groupOrderApi = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -7,16 +8,29 @@ const groupOrderApi = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'GET') {
       const query = req.query as TableProps;
 
-      if (query.showAll === 'true' && !req.query.id) {
+
+      if (query.showAll === 'true') {
         const getAllOrderSnapshot = await prismaClient.orderSnapshot.findMany({
           where: {
             status: 'ACTIVE',
+            ...(query.searchKey && {
+              customer_name: {
+                search: query.searchKey.toLowerCase().concat('*'),
+              },
+            }),
+
+            ...(query.orderDate && {
+              order_date: {
+                gt: new Date(query.orderDate),
+                lt: add(new Date(query.orderDate), { days: 1 }),
+              },
+            }),
           },
         });
 
         return res.status(200).json({
           message: 'Succesfully fetched all group orders',
-          data: { orderSnaphot: getAllOrderSnapshot },
+          data: { ordersSnapshot: getAllOrderSnapshot },
         });
       }
 

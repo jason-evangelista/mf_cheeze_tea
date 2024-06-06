@@ -286,7 +286,6 @@ const OrderForm = ({
                 disableNavigation={addOrderState.isLoading}
                 onSelect={(e) => {
                   if (!e) return;
-                  console.log(e);
                   setValue('product_order_date', e.toISOString());
                 }}
                 selected={new Date(watchProductOrderDate)}

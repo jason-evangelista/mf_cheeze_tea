@@ -1,6 +1,8 @@
 import usePagination from '@/hooks/usePagination';
 import { useGetAllOrderQuery } from '@/services/orderService';
+import { Image, Popover, Tooltip, useMantineTheme } from '@mantine/core';
 import { Order, Product } from '@prisma/client';
+import { IconPhotoSearch } from '@tabler/icons-react';
 import { createColumnHelper } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { useEffect, useMemo } from 'react';
@@ -9,10 +11,16 @@ import DataTable from '../common/Tables/DataTable';
 import Pagination from '../common/Tables/Pagination';
 
 export type OrderTableShape = Order & {
-  product: Pick<Product, 'type' | 'name'>;
+  product: Pick<Product, 'type' | 'name' | 'photo'>;
 };
 
-const OrderListTable = () => {
+type OrderListTableProps = {
+  searchKey: string;
+  orderDate: string;
+};
+
+const OrderListTable = ({ searchKey, orderDate }: OrderListTableProps) => {
+  const theme = useMantineTheme();
   const {
     currentPage,
     handleNextPage,
@@ -24,8 +32,10 @@ const OrderListTable = () => {
   const { data, isSuccess, isLoading, refetch, isFetching } =
     useGetAllOrderQuery({
       currentPage,
-      showAll: false,
+      showAll: orderDate.length || searchKey.length ? true : false,
       skip: numberTokip,
+      searchKey,
+      orderDate,
     });
 
   useEffect(() => {
@@ -34,10 +44,62 @@ const OrderListTable = () => {
     }
   }, [isSuccess]);
 
+  useEffect(() => {
+    console.log({ searchKey });
+  }, [searchKey]);
+
   const columnHelper = createColumnHelper<OrderTableShape>();
 
   const columns = useMemo(
     () => [
+      columnHelper.accessor('product.photo', {
+        header: () => <span>Product Preview</span>,
+        cell: (data) => {
+          return (
+            <>
+              {data.getValue() ? (
+                <Popover width={200} position="right" withArrow>
+                  <Popover.Target>
+                    <Tooltip
+                      label="Click photo to see preview"
+                      position="bottom"
+                      withArrow
+                      sx={{ fontSize: 12 }}
+                    >
+                      <Image
+                        width={60}
+                        height={60}
+                        alt={data.row.original.product.photo ?? ''}
+                        src={data.getValue()}
+                        fit="cover"
+                        sx={{
+                          borderRadius: 8,
+                          border: `1px solid ${theme.colors.gray[3]}`,
+                          overflow: 'hidden',
+                        }}
+                      />
+                    </Tooltip>
+                  </Popover.Target>
+                  <Popover.Dropdown>
+                    <Image
+                      alt={data.row.original.product.photo ?? ''}
+                      src={data.getValue()}
+                      fit="contain"
+                      sx={{
+                        borderRadius: 8,
+                        border: `1px solid ${theme.colors.gray[3]}`,
+                        overflow: 'hidden',
+                      }}
+                    />
+                  </Popover.Dropdown>
+                </Popover>
+              ) : (
+                <IconPhotoSearch size={35} color="gray" stroke={1.2} />
+              )}
+            </>
+          );
+        },
+      }),
       columnHelper.accessor('product.name', {
         cell: (data) => data.getValue(),
         header: () => <span>Product Name</span>,

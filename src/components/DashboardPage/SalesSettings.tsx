@@ -97,7 +97,6 @@ const SalesSettings = ({ refetchReport }: SalesSettingsProps) => {
             label="Select Year"
             placeholder="Select Year"
             onChange={(e) => {
-              console.log(e?.getFullYear());
               setSalesTarget({
                 ...salesTarget,
                 year: e?.getFullYear(),

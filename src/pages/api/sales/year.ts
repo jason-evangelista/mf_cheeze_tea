@@ -1,5 +1,6 @@
 import { parseDate, transformSalesMonth } from '@/constants/salesDates';
 import { calculateSalesByYear } from '@/utils/calculateSales';
+import includeSearchKey from '@/utils/includeSearchKey';
 import { prismaClient } from '@/utils/prismaClient';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -10,15 +11,16 @@ const salesYearApi = async (req: NextApiRequest, res: NextApiResponse) => {
         start_year: number;
         end_year: number;
         productId: string;
+        searchKey: string;
       };
-      const startDate = transformSalesMonth(body.start_year);
-      const endDate = transformSalesMonth(body.end_year);
+      const startDate = transformSalesMonth(body.start_year - 1);
+      const endDate = transformSalesMonth(body.end_year - 1);
 
-      const findYearSalesTarget = await prismaClient.salesTarget.findMany({
-        where: {
-          type: 'YEAR',
-        },
-      });
+      // const findYearSalesTarget = await prismaClient.salesTarget.findMany({
+      //   where: {
+      //     type: 'YEAR',
+      //   },
+      // });
 
       const getSpanYear = await prismaClient.order.findMany({
         where: {
@@ -27,17 +29,14 @@ const salesYearApi = async (req: NextApiRequest, res: NextApiResponse) => {
             gte: parseDate(startDate.Jan.start),
             lte: parseDate(endDate.Dec.end),
           },
-          ...(body?.productId && {
-            product_id: body?.productId,
-          }),
+          ...(body.searchKey && includeSearchKey(body.searchKey)),
         },
       });
 
       const yearSales = await calculateSalesByYear(
-        body?.start_year,
-        body?.end_year,
-        getSpanYear,
-        findYearSalesTarget
+        body?.start_year - 1,
+        body?.end_year - 1,
+        getSpanYear
       );
 
       return res.status(200).json({

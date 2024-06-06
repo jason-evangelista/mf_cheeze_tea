@@ -1,6 +1,6 @@
 import usePagination from '@/hooks/usePagination';
 import { useGetAllGroupOrderQuery } from '@/services/orderService';
-import { Button, Drawer, Text } from '@mantine/core';
+import { Button, Drawer, ScrollArea, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { OrderSnapshot } from '@prisma/client';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -13,7 +13,15 @@ import OrderDetailsInfo from './OrderDetailsInfo';
 
 export type OrderTableShape = OrderSnapshot;
 
-const OrderSnapshotListTable = () => {
+type OrderSnapshotListTableProps = {
+  searchKey: string;
+  orderDate: string;
+};
+
+const OrderSnapshotListTable = ({
+  searchKey,
+  orderDate,
+}: OrderSnapshotListTableProps) => {
   const {
     currentPage,
     handleNextPage,
@@ -28,8 +36,10 @@ const OrderSnapshotListTable = () => {
   const { data, isSuccess, isLoading, refetch, isFetching } =
     useGetAllGroupOrderQuery({
       currentPage,
-      showAll: false,
+      showAll: orderDate.length || searchKey.length ? true : false,
       skip: numberTokip,
+      searchKey,
+      orderDate,
     });
 
   useEffect(() => {
@@ -43,7 +53,7 @@ const OrderSnapshotListTable = () => {
   const columns = useMemo(
     () => [
       columnHelper.accessor('customer_name', {
-        cell: (data) => data.getValue() ?? '-',
+        cell: (data) => data.getValue() || '-',
         header: () => <span>Customer Name</span>,
       }),
       columnHelper.accessor('payment', {
@@ -58,9 +68,10 @@ const OrderSnapshotListTable = () => {
         cell: (data) => <PriceDisplay value={data.getValue()} />,
         header: () => <span>Total Amount</span>,
       }),
-      columnHelper.accessor('created_at', {
-        cell: (data) => format(new Date(data.getValue()), 'dd, MMMM yyyy - hh:mm a'),
-        header: () => <span>Total Amount</span>,
+      columnHelper.accessor('order_date', {
+        cell: (data) =>
+          format(new Date(data.getValue()), 'dd, MMMM yyyy - hh:mm a'),
+        header: () => <span>Order Date</span>,
       }),
       columnHelper.display({
         id: 'actions',
@@ -97,13 +108,18 @@ const OrderSnapshotListTable = () => {
         onClose={close}
         position="right"
         size="md"
+        classNames={{
+          content: 'overflow-hidden',
+          body: 'overflow-y-auto',
+        }}
+        scrollAreaComponent={ScrollArea.Autosize}
       >
         <OrderDetailsInfo orderSnapshot={orderSnapshot} />
       </Drawer>
       <DataTable<OrderTableShape>
         columns={columns}
         isLoading={isLoading || isFetching}
-        data={data?.data?.ordersSnapshot}
+        data={data?.data?.ordersSnapshot ?? []}
       />
       <div className="flex items-center justify-between">
         <Pagination

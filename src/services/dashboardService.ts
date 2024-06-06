@@ -19,6 +19,7 @@ const dashboardApiService = baseApi.injectEndpoints({
         totalSales: number;
         isSalesGrow: boolean;
         growPercentage: string;
+        salesTarget: number;
         date: {
           type: 'Month' | 'Year' | 'Today';
           label: string;
@@ -34,6 +35,7 @@ const dashboardApiService = baseApi.injectEndpoints({
         year?: number;
         productId?: string;
         singleDay?: string;
+        searchKey: string;
       }
     >({
       query: (body) => ({
@@ -45,7 +47,12 @@ const dashboardApiService = baseApi.injectEndpoints({
     }),
     createSalesByDay: builder.mutation<
       BaseSuccessResponse<SalesMonth>,
-      { start_date: string; end_date: string; productId?: string }
+      {
+        start_date: string;
+        end_date: string;
+        productId?: string;
+        searchKey: string;
+      }
     >({
       query: (body) => ({
         url: `/sales/today`,
@@ -56,7 +63,7 @@ const dashboardApiService = baseApi.injectEndpoints({
     }),
     createSalesByMonth: builder.mutation<
       BaseSuccessResponse<SalesMonth>,
-      { year: number; productId?: string }
+      { year: number; productId?: string; searchKey: string }
     >({
       query: (body) => ({
         url: `/sales/month`,
@@ -67,7 +74,12 @@ const dashboardApiService = baseApi.injectEndpoints({
     }),
     createSalesByYear: builder.mutation<
       BaseSuccessResponse<SalesYear>,
-      { start_year: number; end_year: number; productId?: string }
+      {
+        start_year: number;
+        end_year: number;
+        productId?: string;
+        searchKey: string;
+      }
     >({
       query: (body) => ({
         url: `/sales/year`,

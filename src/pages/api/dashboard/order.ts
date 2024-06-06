@@ -1,4 +1,6 @@
 import { parseMonthToNumber } from '@/constants/parseMonth';
+import calculateNextSalesTarget from '@/utils/calculateNextSalesTarget';
+import includeSearchKey from '@/utils/includeSearchKey';
 import { prismaClient } from '@/utils/prismaClient';
 import { endOfMonth, endOfYear, format, startOfYear, sub } from 'date-fns';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -11,6 +13,7 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
         acroMonth: number;
         year: number;
         productId?: string;
+        searchKey: string;
       };
 
       if (query.type === 'Month') {
@@ -29,9 +32,7 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
               gte: firstDate,
               lte: endOfMonth(firstDate),
             },
-            ...(query.productId && {
-              product_id: query.productId,
-            }),
+            ...(query.searchKey && includeSearchKey(query.searchKey)),
           },
         });
 
@@ -39,15 +40,31 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
         const getOrderBehindDate = await prismaClient.order.findMany({
           where: {
             status: 'ACTIVE',
-            ...(query.productId && {
-              product_id: query.productId,
-            }),
+            ...(query.searchKey && includeSearchKey(query.searchKey)),
             order_date: {
               gte: behindDate,
               lte: endOfMonth(behindDate),
             },
           },
         });
+
+        // go back again from behind data
+        const stepBehindDate = sub(firstDate, { months: 2 });
+        const getOrderStepBehindDate = await prismaClient.order.findMany({
+          where: {
+            status: 'ACTIVE',
+            ...(query.searchKey && includeSearchKey(query.searchKey)),
+            order_date: {
+              gte: stepBehindDate,
+              lte: endOfMonth(stepBehindDate),
+            },
+          },
+        });
+
+        const stepBehindDateTotalSales = getOrderStepBehindDate.reduce(
+          (prev, { sub_total }) => prev + sub_total,
+          0
+        );
 
         const behindDateTotalSales = getOrderBehindDate.reduce(
           (prev, { sub_total }) => prev + sub_total,
@@ -58,10 +75,23 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
           (prev, { sub_total }) => prev + sub_total,
           0
         );
+
         const growPercentage = (
           ((totalSales - behindDateTotalSales) / behindDateTotalSales) *
           100
         ).toFixed(1);
+
+        // const stepBehindDateGrowPercentage =
+        //   ((behindDateTotalSales - stepBehindDateTotalSales) /
+        //     behindDateTotalSales) *
+        //   100;
+
+        //check
+        // console.log({
+        //   stepBehindDateTotalSales,
+        //   behindDateTotalSales,
+        //   stepBehindDateGrowPercentage,
+        // });
 
         return res.status(200).json({
           message: 'Successfully fetch Product Order',
@@ -71,6 +101,10 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
             totalSales,
             isSalesGrow: totalSales > behindDateTotalSales,
             growPercentage,
+            salesTarget: calculateNextSalesTarget(
+              behindDateTotalSales,
+              stepBehindDateTotalSales
+            ),
             date: {
               type: 'Month',
               label: format(firstDate, 'MMMM yyyy'),
@@ -88,6 +122,7 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
           type: string;
           year: string;
           productId?: string;
+          searchKey: string;
         };
         const getOrders = await prismaClient.order.findMany({
           where: {
@@ -96,9 +131,7 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
               gte: startOfYear(new Date(+body.year, 0)),
               lte: endOfYear(new Date(+body.year, 0)),
             },
-            ...(query.productId && {
-              product_id: query.productId,
-            }),
+            ...(query.searchKey && includeSearchKey(query.searchKey)),
           },
         });
 
@@ -106,9 +139,7 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
         const getOrderBehindDate = await prismaClient.order.findMany({
           where: {
             status: 'ACTIVE',
-            ...(query.productId && {
-              product_id: query.productId,
-            }),
+            ...(query.searchKey && includeSearchKey(query.searchKey)),
             order_date: {
               gte: startOfYear(behindDate),
               lte: endOfYear(behindDate),
@@ -138,6 +169,10 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
             totalSales,
             isSalesGrow: totalSales > behindDateTotalSales,
             growPercentage,
+            salesTarget: calculateNextSalesTarget(
+              totalSales,
+              behindDateTotalSales
+            ),
             date: {
               type: 'Year',
               label: format(new Date(+body?.year, 0), 'yyyy'),
@@ -155,15 +190,14 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
           type: string;
           singleDay: string;
           productId?: string;
+          searchKey: string;
         };
 
         const getOrders = await prismaClient.order.findMany({
           where: {
             status: 'ACTIVE',
             order_date: new Date(body?.singleDay),
-            ...(query?.productId && {
-              product_id: query?.productId,
-            }),
+            ...(query.searchKey && includeSearchKey(query.searchKey)),
           },
         });
 
@@ -171,9 +205,7 @@ const dashboardOrder = async (req: NextApiRequest, res: NextApiResponse) => {
         const getOrderBehindDate = await prismaClient.order.findMany({
           where: {
             status: 'ACTIVE',
-            ...(query.productId && {
-              product_id: query.productId,
-            }),
+            ...(query.searchKey && includeSearchKey(query.searchKey)),
             order_date: behindDate,
           },
         });

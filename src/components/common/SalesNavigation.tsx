@@ -1,35 +1,56 @@
+import { UserContext } from '@/providers/AuthProvider';
+import Logo from '@/styles/assets/logo.png';
 import { NavLink, ThemeIcon } from '@mantine/core';
 import {
   IconCoin,
   IconReportAnalytics,
   IconShoppingCart,
+  IconUserPlus,
 } from '@tabler/icons-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ReactNode } from 'react';
+import { ReactNode, useContext } from 'react';
 
 const SalesNavigation = () => {
+  const user = useContext(UserContext);
+  const isSuperUser = user?.account_type === 'SUPER';
   const router = useRouter();
   const SALES_NAVIGATION_LINKS: {
     link: string;
     label: string;
     icon: ReactNode;
   }[] = [
-    {
-      link: '/dashboard',
-      label: 'Dashboard',
-      icon: <IconReportAnalytics size={18} />,
-    },
-    {
-      link: '/products/list',
-      label: 'Products',
-      icon: <IconShoppingCart size={18} />,
-    },
-    {
-      link: '/orders',
-      label: 'Orders',
-      icon: <IconCoin size={18} />,
-    },
+    ...(isSuperUser
+      ? [
+          {
+            link: '/dashboard',
+            label: 'Dashboard',
+            icon: <IconReportAnalytics size={18} />,
+          },
+          {
+            link: '/products/list',
+            label: 'Products',
+            icon: <IconShoppingCart size={18} />,
+          },
+          {
+            link: '/orders',
+            label: 'Orders',
+            icon: <IconCoin size={18} />,
+          },
+          {
+            link: '/manage-user',
+            label: 'Manage User',
+            icon: <IconUserPlus size={18} />,
+          },
+        ]
+      : [
+          {
+            link: '/orders',
+            label: 'Orders',
+            icon: <IconCoin size={18} />,
+          },
+        ]),
   ];
 
   return (
@@ -48,6 +69,15 @@ const SalesNavigation = () => {
           />
         </Link>
       ))}
+      <div className="flex justify-center mt-4">
+        <Image
+          src={Logo}
+          alt="Macee Float Cheeze Tea"
+          width={120}
+          style={{ objectFit: 'cover' }}
+          priority
+        />
+      </div>
     </nav>
   );
 };

@@ -1,5 +1,10 @@
 import { ProductSchema } from '@/schema/schema';
 import { TableProps } from '@/types/TableProps';
+import {
+  handleDeleteImageUpload,
+  handleImageUpload,
+  handleUpdateImageUpload,
+} from '@/utils/cloudinary';
 import { prismaClient } from '@/utils/prismaClient';
 import { ProductType } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -22,6 +27,9 @@ const productApi = async (req: NextApiRequest, res: NextApiResponse) => {
       if (findProduct)
         return res.status(400).json({ message: 'Product already exist' });
 
+      // Upload image first if any
+      const uploadResult = await handleImageUpload(body.product_photo ?? '');
+
       const saveProduct = await prismaClient.product.create({
         data: {
           name: body?.product_name,
@@ -29,6 +37,8 @@ const productApi = async (req: NextApiRequest, res: NextApiResponse) => {
           large_size_amount: body?.large_size_amount,
           regular_size_amount: body?.regular_size_amount,
           fixed_amount: body?.fixed_amount ?? null,
+          photo: uploadResult.url,
+          photo_asset_id: uploadResult.asset_id,
         },
       });
 
@@ -66,21 +76,21 @@ const productApi = async (req: NextApiRequest, res: NextApiResponse) => {
           },
         });
       }
-      if (query.showAll === 'true' && !req.query.id) {
+      if (query.showAll === 'true') {
         const getAllProduct = await prismaClient.product.findMany({
           where: {
             status: 'ACTIVE',
-          },
-          ...(query.searchKey !== 'undefined' && {
-            where: {
+            ...(query.searchKey && {
               name: {
-                search: query.searchKey.replace(/[^a-zA-Z ]/g, '').concat(' *'),
+                search: query.searchKey.toLowerCase().concat('*'),
               },
-              AND: {
-                status: 'ACTIVE',
+            }),
+            ...(query.productType && {
+              type: {
+                equals: query.productType,
               },
-            },
-          }),
+            }),
+          },
         });
         return res.status(200).json({
           message: 'Successfuly fetched product',
@@ -119,8 +129,10 @@ const productApi = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       });
 
-      if (findProduct)
-        return res.status(400).json({ message: 'Product name already exist' });
+      const updateImageResult = await handleUpdateImageUpload({
+        file: body.product_photo ?? '',
+        assetId: findProduct ? findProduct.photo_asset_id ?? '' : '',
+      });
 
       const updateProduct = await prismaClient.product.update({
         where: {
@@ -132,6 +144,8 @@ const productApi = async (req: NextApiRequest, res: NextApiResponse) => {
           large_size_amount: body?.large_size_amount,
           regular_size_amount: body?.regular_size_amount,
           type: body?.product_type as ProductType,
+          photo: updateImageResult.url,
+          photo_asset_id: updateImageResult.asset_id,
         },
       });
 
@@ -150,6 +164,8 @@ const productApi = async (req: NextApiRequest, res: NextApiResponse) => {
 
       if (!findProduct)
         return res.status(400).json({ message: "Product doesn't exist" });
+
+      await handleDeleteImageUpload(findProduct.photo_asset_id ?? '');
 
       const deleteProduct = await prismaClient.product.update({
         data: {

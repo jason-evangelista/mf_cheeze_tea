@@ -6,6 +6,8 @@ import {
   useGetAllDashboardProductQuery,
 } from '@/services/dashboardService';
 
+import { parseSingleMonthToNumber } from '@/constants/parseMonth';
+import { SearchContext } from '@/providers/SearchProvider';
 import {
   useGetAllCategoryPerformanceQuery,
   useGetAllProductPerformanceQuery,
@@ -14,6 +16,7 @@ import {
   Badge,
   Box,
   Divider,
+  Grid,
   Group,
   Loader,
   LoadingOverlay,
@@ -43,7 +46,6 @@ import MainSaleGraph from '../common/Graphs/MainSaleGraph';
 import ProductPerfGraph from '../common/Graphs/ProductPerfGraph';
 import PriceDisplay from '../common/PriceDisplay';
 import { DashboardContext } from './DashboardContext';
-import SalesSettings from './SalesSettings';
 
 const DashboardPage = () => {
   const router = useRouter();
@@ -64,6 +66,8 @@ const DashboardPage = () => {
 
   const [createDashboardOrderSR, dashboardOrderState] =
     useCreateDashboarSalesdOrderMutation();
+
+  const { searchKey, setSearchKey } = useContext(SearchContext);
 
   const [createSalesDay, salesDayState] = useCreateSalesByDayMutation();
   const [createSalesMonth, salesMonthState] = useCreateSalesByMonthMutation();
@@ -133,6 +137,7 @@ const DashboardPage = () => {
   }, [
     dashboardOrderState?.data?.data?.orders,
     dashboardProduct?.data?.data?.products,
+    searchKey,
   ]);
 
   useEffect(() => {
@@ -149,13 +154,15 @@ const DashboardPage = () => {
         start_date: dashboardOrderDay?.start_date ?? '',
         end_date: dashboardOrderDay?.end_date ?? '',
         productId: productId?.today,
+        searchKey,
       });
       createDashboardOrderSR({
         type: 'Today',
         singleDay: format(new Date(), 'yyyy-MM-dd'),
+        searchKey,
       });
     }
-  }, [salesType, productId?.today, dashboardOrderDay]);
+  }, [salesType, productId?.today, dashboardOrderDay, searchKey]);
 
   // Initial Load Month
   useEffect(() => {
@@ -163,23 +170,34 @@ const DashboardPage = () => {
     if (salesType === 'Month') {
       salesYearState.reset();
       salesDayState.reset();
-      createSalesMonth({ year: salesYear, productId: productId?.month });
+      createSalesMonth({
+        year: salesYear,
+        productId: productId?.month,
+        searchKey,
+      });
       createDashboardOrderSR({
         acroMonth: new Date().getMonth(),
         type: 'Month',
         year: new Date().getFullYear(),
+        searchKey,
       });
     }
-  }, [salesYear, salesType, productId?.month]);
+  }, [salesYear, salesType, productId?.month, searchKey]);
 
   // Initial Load Year
   useEffect(() => {
     if (salesType === 'Year' && yearRange?.start_year && yearRange?.end_year) {
       salesMonthState.reset();
       salesDayState.reset();
-      createSalesYear({ ...yearRange, productId: productId?.year });
+      createSalesYear({ ...yearRange, productId: productId?.year, searchKey });
     }
-  }, [salesType, yearRange?.start_year, yearRange?.end_year, productId?.year]);
+  }, [
+    salesType,
+    yearRange?.start_year,
+    yearRange?.end_year,
+    productId?.year,
+    searchKey,
+  ]);
 
   // On Collapse Filter Change
   useEffect(() => {
@@ -189,6 +207,7 @@ const DashboardPage = () => {
         type: 'Month',
         year: salesYear ?? 0,
         productId: dashboardOrdersMonth?.productId,
+        searchKey,
       });
     }
     if (salesType === 'Year') {
@@ -196,6 +215,7 @@ const DashboardPage = () => {
         type: 'Year',
         year: +(router?.query?.v as string) || new Date().getFullYear(),
         productId: dashboardOrdersYear?.productId,
+        searchKey,
       });
     }
     if (salesType === 'Today') {
@@ -204,6 +224,7 @@ const DashboardPage = () => {
         singleDay:
           (router?.query?.v as string) ?? format(new Date(), 'yyyy-MM-dd'),
         productId: dashboardOrderDay?.productId,
+        searchKey,
       });
     }
   }, [
@@ -214,12 +235,31 @@ const DashboardPage = () => {
     salesType,
     router?.query?.v,
     salesYear,
+    searchKey,
   ]);
+
+  useEffect(() => {
+    if (salesType === 'Month') {
+      router.replace({
+        query: {
+          ...router.query,
+          v: Object.keys(parseSingleMonthToNumber).find(
+            (key) =>
+              parseSingleMonthToNumber[key] === new Date().getMonth().toString()
+          ),
+        },
+      });
+    }
+  }, [salesType]);
+
+  useEffect(() => {
+    setSearchKey('');
+  }, [salesType]);
 
   return (
     <>
       <Modal title="Sales Target" onClose={close} opened={opened}>
-        <SalesSettings
+        {/* <SalesSettings
           refetchReport={() => {
             if (salesType === 'Month') {
               salesYearState.reset();
@@ -231,7 +271,7 @@ const DashboardPage = () => {
               createSalesYear(yearRange);
             }
           }}
-        />
+        /> */}
       </Modal>
       <Tabs defaultValue="sales-report" variant="pills">
         <Paper className="p-1">
@@ -260,200 +300,278 @@ const DashboardPage = () => {
           </Tabs.List>
         </Paper>
         <Tabs.Panel value="sales-report" className="py-4 relative w-full">
-          <Group grow align="start">
-            <Paper radius="md" className="p-4">
-              <MainSaleGraph
-                data={
-                  salesMonthState?.data?.data ||
-                  salesYearState?.data?.data ||
-                  salesDayState?.data?.data
-                }
-                handleOpenSalesTarget={open}
-                loading={
-                  salesMonthState.isLoading ||
-                  salesYearState.isLoading ||
-                  salesDayState.isLoading ||
-                  salesDayState.isLoading
-                }
-                handleLineClick={handleLineClick}
-              />
-            </Paper>
-            <Group grow align="start">
-              <Paper radius="md" shadow="sm" className="p-3" pos="relative">
-                <LoadingOverlay visible={dashboardOrderState.isLoading} />
-                <Title order={4} color={colors.gray[8]}>
-                  Overall
-                </Title>
-                <Divider
-                  label={
-                    <Badge variant="filled">
-                      {dashboardOrderState?.data?.data?.date.label}
-                    </Badge>
+          <Grid>
+            <Grid.Col lg={6} span={12}>
+              <Paper radius="md" className="p-4">
+                <MainSaleGraph
+                  data={
+                    salesMonthState?.data?.data ||
+                    salesYearState?.data?.data ||
+                    salesDayState?.data?.data
                   }
-                  className="my-2"
+                  handleOpenSalesTarget={open}
+                  loading={
+                    salesMonthState.isLoading ||
+                    salesYearState.isLoading ||
+                    salesDayState.isLoading ||
+                    salesDayState.isLoading
+                  }
+                  handleLineClick={handleLineClick}
                 />
-                <div
-                  aria-label="Total Sales"
-                  className="flex gap-4 items-start flex-wrap"
+              </Paper>
+            </Grid.Col>
+            <Grid.Col lg={6} span={12}>
+              <Group grow align="start">
+                <Paper
+                  radius="md"
+                  shadow="sm"
+                  className="p-3"
+                  pos="relative"
+                  sx={{ overflow: 'hidden' }}
                 >
-                  <Box>
-                    <Badge variant="dot">Total Sales</Badge>
-                    <Title className="flex items-center" order={2}>
-                      <PriceDisplay
-                        value={dashboardOrderState?.data?.data?.totalSales}
-                        fallback={
-                          <span className="text-base text-gray-500">
-                            No Current Sales
-                          </span>
-                        }
-                      />
-                    </Title>
-                  </Box>
-                  {!salesNotValid && (
-                    <Box>
-                      <Badge
-                        variant="light"
-                        color={
-                          dashboardOrderState?.data?.data?.isSalesGrow
-                            ? 'green'
-                            : 'red'
-                        }
-                      >
-                        Sales Growth %
+                  <LoadingOverlay visible={dashboardOrderState.isLoading} />
+                  <Title order={4} color={colors.gray[8]}>
+                    Overall
+                  </Title>
+                  <Divider
+                    label={
+                      <Badge variant="filled">
+                        {dashboardOrderState?.data?.data?.date.label}
                       </Badge>
-                      <Title
-                        order={2}
-                        color={
-                          dashboardOrderState?.data?.data?.isSalesGrow
-                            ? 'green'
-                            : 'red'
-                        }
-                      >
-                        {dashboardOrderState?.data?.data?.growPercentage}%
-                        <span className="align-middle">
-                          {dashboardOrderState?.data?.data?.isSalesGrow ? (
-                            <IconTrendingUp />
-                          ) : (
-                            <IconTrendingDown />
-                          )}
-                        </span>
+                    }
+                    className="my-2"
+                  />
+                  <div
+                    aria-label="Total Sales"
+                    className="flex gap-4 items-start flex-wrap"
+                  >
+                    <Box>
+                      <Badge variant="dot">Total Sales</Badge>
+                      <Title className="flex items-center" order={2}>
+                        <PriceDisplay
+                          value={dashboardOrderState?.data?.data?.totalSales}
+                          fallback={
+                            <span className="text-base text-gray-500">
+                              No Current Sales
+                            </span>
+                          }
+                        />
                       </Title>
                     </Box>
-                  )}
-                </div>
-                <Divider className="my-2" />
-                <div aria-label="Total Orders">
-                  <Badge variant="dot">Total Orders</Badge>
-                  <Title order={2}>
-                    {dashboardOrderState?.data?.data?.orderCount || (
-                      <span className="text-base text-gray-500">
-                        No Current Orders
-                      </span>
-                    )}
-                  </Title>
-                </div>
-              </Paper>
-              <Paper
-                aria-label="Best Selling Products"
-                radius="md"
-                shadow="sm"
-                className="p-4"
-                pos="relative"
-              >
-                <LoadingOverlay visible={dashboardOrderState.isLoading} />
-                <Title order={4} color={colors.gray[8]}>
-                  Best Selling Product
-                </Title>
-                <Divider
-                  label={
-                    <Badge variant="filled">
-                      {dashboardOrderState?.data?.data?.date.label}
-                    </Badge>
-                  }
-                  className="mb-4"
-                />
-                <ScrollArea.Autosize mah={400} p={4} offsetScrollbars>
-                  <div className="p-2">
-                    <Timeline
-                      bulletSize={18}
-                      lineWidth={1}
-                      active={999}
-                      color="blue"
-                    >
-                      {Object.entries(memoBestSellingProduct)
-                        .filter((item) => item[0] !== 'undefined')
-                        .sort(
-                          (a, b) => (b[1] as any).count - (a[1] as any).count
-                        )
-                        .map((item) => (
-                          <Timeline.Item
-                            className="text-sm"
-                            key={item[0]}
-                            title={<span className="font-bold">{item[0]}</span>}
-                            bulletSize={20}
-                          >
-                            <Paper
-                              shadow="sm"
-                              radius="sm"
-                              className="p-4"
-                              withBorder
+                    {!salesNotValid &&
+                      (salesType === 'Month' || salesType === 'Year') && (
+                        <>
+                          <Box>
+                            <Badge
+                              variant="filled"
+                              color={
+                                dashboardOrderState?.data?.data?.isSalesGrow
+                                  ? 'green'
+                                  : 'red'
+                              }
                             >
-                              <Text>
-                                Frequency:&nbsp;{(item[1] as any).count}
-                              </Text>
-                              <Text className="font-medium">
-                                Qty Sold:&nbsp;
-                                {(
-                                  item[1] as { totalSales: Order[] }
-                                ).totalSales?.reduce(
-                                  (prev, { quantity_sale }) =>
-                                    prev + quantity_sale,
-                                  0
+                              Sales Growth% From Past{' '}
+                              {salesType === 'Month' ? 'Month' : 'Year'}
+                            </Badge>
+                            <Title
+                              order={2}
+                              color={
+                                dashboardOrderState?.data?.data?.isSalesGrow
+                                  ? 'green'
+                                  : 'red'
+                              }
+                            >
+                              {dashboardOrderState?.data?.data?.growPercentage}%
+                              <span className="align-middle">
+                                {dashboardOrderState?.data?.data
+                                  ?.isSalesGrow ? (
+                                  <IconTrendingUp />
+                                ) : (
+                                  <IconTrendingDown />
                                 )}
-                              </Text>
-                              <Text className="font-medium flex items-center gap-1">
-                                Sales:&nbsp;
-                                <PriceDisplay
-                                  value={(
+                              </span>
+                            </Title>
+                          </Box>
+                          <Box>
+                            <Badge color="green" variant="outline">
+                              Sales Target For&nbsp;
+                              {dashboardOrderState?.data?.data?.date.label}
+                            </Badge>
+                            <Title order={3}>
+                              <PriceDisplay
+                                fallback="No current sales target"
+                                value={
+                                  dashboardOrderState?.data?.data?.salesTarget
+                                }
+                              />
+                            </Title>
+                          </Box>
+                        </>
+                      )}
+                  </div>
+                  <Divider className="my-2" />
+                  <div aria-label="Total Orders">
+                    <Badge variant="dot">Total Orders</Badge>
+                    <Title order={2}>
+                      {dashboardOrderState?.data?.data?.orderCount || (
+                        <span className="text-base text-gray-500">
+                          No Current Orders
+                        </span>
+                      )}
+                    </Title>
+                  </div>
+
+                  <Divider className="my-2" />
+                  <div aria-label="Previous Data Record">
+                    {(salesType === 'Month' || salesType === 'Year') && (
+                      <div>
+                        <Title order={6} variant="outline">
+                          Previous {salesType === 'Month' ? 'Month' : 'Year'}{' '}
+                          Sales
+                        </Title>
+
+                        <Badge variant="filled">
+                          {dashboardOrderState?.data?.data?.behindDate.date}
+                        </Badge>
+                        <Title order={4}>
+                          <PriceDisplay
+                            value={
+                              dashboardOrderState?.data?.data?.behindDate
+                                .totalSales
+                            }
+                            fallback="0"
+                          />
+                        </Title>
+                      </div>
+                    )}
+                    {salesType === 'Today' && (
+                      <div>
+                        <Title order={6} variant="outline">
+                          Previous Day Sales
+                        </Title>
+
+                        <Badge variant="filled">
+                          {dashboardOrderState?.data?.data?.behindDate.date}
+                        </Badge>
+                        <Title order={4}>
+                          <PriceDisplay
+                            value={
+                              dashboardOrderState?.data?.data?.behindDate
+                                .totalSales
+                            }
+                            fallback="0"
+                          />
+                        </Title>
+                      </div>
+                    )}
+                  </div>
+                </Paper>
+                <Paper
+                  aria-label="Best Selling Products"
+                  radius="md"
+                  shadow="sm"
+                  className="p-4"
+                  pos="relative"
+                  sx={{ overflow: 'hidden' }}
+                >
+                  <LoadingOverlay visible={dashboardOrderState.isLoading} />
+                  <Title order={4} color={colors.gray[8]}>
+                    Best Selling Product
+                  </Title>
+                  <Divider
+                    label={
+                      <Badge variant="filled">
+                        {dashboardOrderState?.data?.data?.date.label}
+                      </Badge>
+                    }
+                    className="mb-4"
+                  />
+                  <ScrollArea.Autosize mah={400} p={4} offsetScrollbars>
+                    <div className="p-2">
+                      <Timeline
+                        bulletSize={18}
+                        lineWidth={1}
+                        active={999}
+                        color="orange"
+                      >
+                        {Object.entries(memoBestSellingProduct)
+                          .filter((item) => item[0] !== 'undefined')
+                          .sort(
+                            (a, b) => (b[1] as any).count - (a[1] as any).count
+                          )
+                          .map((item) => (
+                            <Timeline.Item
+                              className="text-sm"
+                              key={item[0]}
+                              title={
+                                <span className="font-bold">{item[0]}</span>
+                              }
+                              bulletSize={20}
+                            >
+                              <Paper
+                                shadow="sm"
+                                radius="sm"
+                                className="p-4"
+                                withBorder
+                              >
+                                <Text>
+                                  Frequency:&nbsp;{(item[1] as any).count}
+                                </Text>
+                                <Text className="font-medium">
+                                  Qty Sold:&nbsp;
+                                  {(
                                     item[1] as { totalSales: Order[] }
                                   ).totalSales?.reduce(
-                                    (prev, { sub_total }) => prev + sub_total,
+                                    (prev, { quantity_sale }) =>
+                                      prev + quantity_sale,
                                     0
                                   )}
-                                />
-                                <Badge className="align-middlegn">
-                                  {(
-                                    ((
+                                </Text>
+                                <Text className="font-medium flex items-center gap-1">
+                                  Sales:&nbsp;
+                                  <PriceDisplay
+                                    value={(
                                       item[1] as { totalSales: Order[] }
                                     ).totalSales?.reduce(
                                       (prev, { sub_total }) => prev + sub_total,
                                       0
-                                    ) /
-                                      dashboardOrderState?.data?.data
-                                        ?.totalSales!) *
-                                    100
-                                  ).toFixed(1)}
-                                  %
-                                </Badge>
-                              </Text>
-                            </Paper>
-                          </Timeline.Item>
-                        ))}
-                    </Timeline>
-                    {!Object.entries(memoBestSellingProduct).length && (
-                      <Title order={2}>
-                        {dashboardOrderState?.data?.data?.orderCount || (
-                          <span className="text-base text-gray-500">
-                            No Current Sales
-                          </span>
-                        )}
-                      </Title>
-                    )}
-                  </div>
-                </ScrollArea.Autosize>
-              </Paper>
-            </Group>
-          </Group>
+                                    )}
+                                  />
+                                  <Badge className="align-middlegn">
+                                    {(
+                                      ((
+                                        item[1] as { totalSales: Order[] }
+                                      ).totalSales?.reduce(
+                                        (prev, { sub_total }) =>
+                                          prev + sub_total,
+                                        0
+                                      ) /
+                                        dashboardOrderState?.data?.data
+                                          ?.totalSales!) *
+                                      100
+                                    ).toFixed(1)}
+                                    %
+                                  </Badge>
+                                </Text>
+                              </Paper>
+                            </Timeline.Item>
+                          ))}
+                      </Timeline>
+                      {!Object.entries(memoBestSellingProduct).length && (
+                        <Title order={2}>
+                          {dashboardOrderState?.data?.data?.orderCount || (
+                            <span className="text-base text-gray-500">
+                              No Current Sales
+                            </span>
+                          )}
+                        </Title>
+                      )}
+                    </div>
+                  </ScrollArea.Autosize>
+                </Paper>
+              </Group>
+            </Grid.Col>
+          </Grid>
         </Tabs.Panel>
         <Tabs.Panel value="product-performance" className="py-3">
           {productPerformance.isLoading || productPerformance.isFetching ? (

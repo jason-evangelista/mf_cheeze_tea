@@ -25,8 +25,6 @@ const salesTargetApi = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       });
 
-      console.log({ upsertMonthSalesTarget });
-
       if (upsertMonthSalesTarget)
         return res
           .status(200)
@@ -34,7 +32,6 @@ const salesTargetApi = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     if (req.method === 'POST' && body.type === 'Year') {
-      console.log({ body });
       const findSalesTargetYear = await prismaClient.salesTarget.findFirst({
         where: {
           type: 'YEAR',

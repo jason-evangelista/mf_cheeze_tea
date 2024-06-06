@@ -33,10 +33,32 @@ const orderApi = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'GET') {
       const query = req.query as TableProps;
 
-      if (query.showAll === 'true' && !req.query.id) {
+      if (query.showAll === 'true') {
         const getAllOrders = await prismaClient.order.findMany({
           where: {
             status: 'ACTIVE',
+            ...(query.searchKey && {
+              product: {
+                name: {
+                  search: query.searchKey.toLowerCase().concat('*'),
+                },
+              },
+            }),
+            ...(query.orderDate && {
+              order_date: {
+                gt: new Date(query.orderDate),
+                lt: add(new Date(query.orderDate), { days: 1 }),
+              },
+            }),
+          },
+          include: {
+            product: {
+              select: {
+                type: true,
+                name: true,
+                photo: true,
+              },
+            },
           },
         });
 
@@ -79,6 +101,7 @@ const orderApi = async (req: NextApiRequest, res: NextApiResponse) => {
               select: {
                 type: true,
                 name: true,
+                photo: true,
               },
             },
           },

@@ -1,8 +1,10 @@
+import { productType } from '@/constants/productType';
+import { SearchContext } from '@/providers/SearchProvider';
 import { ProductSchema } from '@/schema/schema';
-import { Button, Modal, Paper } from '@mantine/core';
+import { Button, Group, Modal, Paper, Select, TextInput } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconPlus } from '@tabler/icons-react';
-import { useMemo, useState } from 'react';
+import { IconPlus, IconSearch, IconTag } from '@tabler/icons-react';
+import { useContext, useMemo, useState } from 'react';
 import ProductForm from './ProductForm';
 import ProductListTable from './ProductListTable';
 
@@ -11,9 +13,15 @@ const ProductListPage = () => {
     ProductSchema & { id: string }
   >();
   const [opened, { close, open }] = useDisclosure(false);
+  const {
+    searchKey,
+    setSearchKey,
+    setProductType,
+    productType: productFilterType,
+  } = useContext(SearchContext);
 
   const handleGetProductInfo = (payload: ProductSchema & { id: string }) => {
-    setProductInfo(payload);
+    setProductInfo({ ...payload });
     open();
   };
 
@@ -25,6 +33,7 @@ const ProductListPage = () => {
       fixed_amount: undefined,
       large_size_amount: undefined,
       regular_size_amount: undefined,
+      product_photo: '',
     });
   };
 
@@ -48,7 +57,25 @@ const ProductListPage = () => {
         />
       </Modal>
       <Paper radius="md" className="p-4">
-        <div className="w-full flex justify-end my-2">
+        <div className="w-full flex justify-between my-2">
+          <Group>
+            <Select
+              icon={<IconTag size={16} />}
+              clearable
+              data={productType}
+              placeholder="Select product type"
+              w={250}
+              onChange={(e) => setProductType(e ?? '')}
+            />
+            {productFilterType && (
+              <TextInput
+                icon={<IconSearch size={16} />}
+                placeholder="Search product name"
+                onChange={(v) => setSearchKey(v.currentTarget.value)}
+                w={300}
+              />
+            )}
+          </Group>
           <Button
             onClick={open}
             color="green"
@@ -58,7 +85,11 @@ const ProductListPage = () => {
             Add Product
           </Button>
         </div>
-        <ProductListTable handleGetProductInfo={handleGetProductInfo} />
+        <ProductListTable
+          handleGetProductInfo={handleGetProductInfo}
+          searchKey={searchKey}
+          productFilterType={productFilterType}
+        />
       </Paper>
     </>
   );

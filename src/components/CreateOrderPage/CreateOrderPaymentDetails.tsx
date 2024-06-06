@@ -6,6 +6,7 @@ import {
   Stack,
   Text,
 } from '@mantine/core';
+import { DateInput, DateValue } from '@mantine/dates';
 import { useEffect, useState } from 'react';
 import PriceDisplay from '../common/PriceDisplay';
 import { PaymentDetailsParams } from './CreateOrderCart';
@@ -25,6 +26,7 @@ const CreateOrderPaymentDetails = ({
   const [payment, setPayment] = useState<number>(0);
   const [change, setChange] = useState<number>(0);
   const [customerName, setCustomerName] = useState('');
+  const [orderDate, setOrderDate] = useState<DateValue>(new Date());
 
   useEffect(() => {
     if (payment && payment > totalAmount) {
@@ -33,7 +35,7 @@ const CreateOrderPaymentDetails = ({
   }, [payment, change]);
 
   return (
-    <div>
+    <div className="z-[99999]">
       <Divider label="Total Amount" />
       <Text color="green" fw="bold" className="text-xl">
         <PriceDisplay value={totalAmount} />
@@ -47,6 +49,13 @@ const CreateOrderPaymentDetails = ({
             value={customerName}
           />
         </Input.Wrapper>
+
+        <DateInput
+          popoverProps={{ withinPortal: true }}
+          label="Order Date"
+          value={orderDate}
+          onChange={(e) => setOrderDate(e)}
+        />
         <Input.Wrapper label="Payment Amount">
           <NumberInput
             thousandsSeparator=","
@@ -84,11 +93,17 @@ const CreateOrderPaymentDetails = ({
             </div>
           </>
         ) : null}
-        {payment! > totalAmount && (
+        {payment! >= totalAmount && (
           <Button
             loading={loading}
             onClick={() =>
-              handleSubmitOrder({ change, payment, customerName, totalAmount })
+              handleSubmitOrder({
+                change,
+                payment,
+                customerName,
+                totalAmount,
+                orderDate,
+              })
             }
             disabled={totalAmount > payment}
           >

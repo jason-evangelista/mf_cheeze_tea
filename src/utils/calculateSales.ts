@@ -4,19 +4,40 @@ import { eachDayOfInterval, format } from 'date-fns';
 const calculateSalesByMonth = (
   month: Order[],
   label: string,
-  salesTarget: SalesTarget[]
-) => ({
-  actual_sales: month.reduce((prev, { sub_total }) => prev + sub_total, 0),
-  label,
-  sales_target:
-    salesTarget.find((item) => item.month?.match(label))?.target ?? 0,
-});
+  salesTarget: SalesTarget[],
+  prevMonth: Order[],
+  realCurrentMonth: Order[]
+) => {
+  const currentMonthSales = month.reduce(
+    (prev, { sub_total }) => prev + sub_total,
+    0
+  );
+  const prevMonthSales = prevMonth.reduce(
+    (prev, { sub_total }) => prev + sub_total,
+    0
+  );
+  const growthRate = (currentMonthSales - prevMonthSales) / prevMonthSales;
+
+  const salesNextTarget = currentMonthSales + growthRate * currentMonthSales;
+
+
+  return {
+    actual_sales: realCurrentMonth.reduce(
+      (prev, { sub_total }) => prev + sub_total,
+      0
+    ),
+    label,
+    sales_target:
+      salesNextTarget.toFixed(0) === 'Infinity'
+        ? 0
+        : salesNextTarget.toFixed(0),
+  };
+};
 
 export const calculateSalesByYear = async (
   startYear: number,
   endYear: number,
-  data: Order[],
-  salesTarget: SalesTarget[]
+  data: Order[]
 ) => {
   const yearGroup: number[] = [];
   for (let i = startYear; i <= endYear; i++) {
@@ -28,9 +49,22 @@ export const calculateSalesByYear = async (
       (item) => !item.order_date.toISOString().search(year.toString())
     );
 
-    const findYearSaleTarget =
-      salesTarget.find((item) => item.year?.toString().match(year.toString()))
-        ?.target ?? 0;
+    const currentYearSales = findItem.reduce(
+      (prev, { sub_total }) => prev + sub_total,
+      0
+    );
+    const prevYearSales = data
+      ?.filter(
+        (item) => !item.order_date.toISOString().search((year - 1).toString())
+      )
+      .reduce((prev, { sub_total }) => prev + sub_total, 0);
+
+    const growthRate = (currentYearSales - prevYearSales) / prevYearSales;
+    const salesNextTarget = currentYearSales + growthRate * currentYearSales;
+
+    // const findYearSaleTarget =
+    //   salesTarget.find((item) => item.year?.toString().match(year.toString()))
+    //     ?.target ?? 0;
 
     return {
       ...prev,
@@ -40,7 +74,10 @@ export const calculateSalesByYear = async (
           0
         ),
         label: year.toString(),
-        sales_target: findYearSaleTarget,
+        sales_target:
+          salesNextTarget.toFixed(0) === 'Infinity'
+            ? 0
+            : salesNextTarget.toFixed(0),
       },
     };
   }, {});
@@ -73,8 +110,6 @@ export const calculateSalesByDay = async (
       },
     };
   }, {});
-
-  console.log({ salesByDay });
 
   return salesByDay;
 };

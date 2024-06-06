@@ -1,10 +1,17 @@
-import { Collapse, Divider, LoadingOverlay, Select, Tabs } from '@mantine/core';
+import { SearchContext } from '@/providers/SearchProvider';
+import {
+  Collapse,
+  Divider,
+  LoadingOverlay,
+  Tabs,
+  TextInput
+} from '@mantine/core';
 import { DatePickerInput, YearPickerInput } from '@mantine/dates';
 import { Product } from '@prisma/client';
-import { IconCalendar } from '@tabler/icons-react';
+import { IconCalendar, IconSearch } from '@tabler/icons-react';
 import { format } from 'date-fns';
 import { useRouter } from 'next/router';
-import { memo, useContext, useMemo } from 'react';
+import { memo, useContext } from 'react';
 import { DashboardContext } from './DashboardContext';
 
 type CollapseSalesFilterProps = {
@@ -16,25 +23,23 @@ type CollapseSalesFilterProps = {
 const CollapseSalesFilter = ({
   opened,
   isLoading,
-  products,
 }: CollapseSalesFilterProps) => {
   const router = useRouter();
+
+  const { setSearchKey } = useContext(SearchContext);
+
   const {
     handleChangeSalesType,
     handleSetSaleYear,
-    handleSetProductId,
     handleDashboardOrdersMonth,
     handleFilterYearRange,
-    handleDashboardOrdersYear,
     handleDashboardOrdersDay,
-    dashboardOrderDay,
     dashboardOrdersMonth,
   } = useContext(DashboardContext);
 
-  const memoProductData = useMemo(
-    () => products.map((item) => ({ value: item.id, label: item.name })),
-    [products]
-  );
+  const handleSearchKey = (value: string) => {
+    setSearchKey(value.toLowerCase().concat('*'));
+  };
 
   return (
     <>
@@ -76,19 +81,11 @@ const CollapseSalesFilter = ({
           <Tabs.Panel value="Today" className="px-4">
             <LoadingOverlay visible={isLoading} />
             <div className="max-w-[30%] flex flex-col gap-2">
-              <Select
-                clearable
-                data={memoProductData}
-                placeholder="Select Product"
-                onChange={(e) => {
-                  if (typeof handleSetProductId === 'function')
-                    handleSetProductId(e ?? '', 'Today');
-                  if (typeof handleDashboardOrdersDay === 'function')
-                    handleDashboardOrdersDay({
-                      ...dashboardOrderDay,
-                      productId: e ?? '',
-                    });
-                }}
+              <TextInput
+                placeholder="Search keyword product names"
+                icon={<IconSearch size={16} />}
+                w={280}
+                onChange={(e) => handleSearchKey(e.currentTarget.value)}
               />
               <DatePickerInput
                 placeholder="Select Date"
@@ -107,16 +104,11 @@ const CollapseSalesFilter = ({
           <Tabs.Panel value="Month" className="px-4">
             <LoadingOverlay visible={isLoading} />
             <div className="max-w-[30%] flex flex-col gap-2">
-              <Select
-                data={memoProductData}
-                clearable
-                placeholder="Select Product"
-                onChange={(e) => {
-                  if (typeof handleSetProductId === 'function')
-                    handleSetProductId(e ?? '', 'Month');
-                  if (typeof handleDashboardOrdersMonth === 'function')
-                    handleDashboardOrdersMonth({ productId: e ?? '' });
-                }}
+              <TextInput
+                placeholder="Search keyword product names"
+                icon={<IconSearch size={16} />}
+                w={280}
+                onChange={(e) => handleSearchKey(e.currentTarget.value)}
               />
               <YearPickerInput
                 defaultValue={new Date(dashboardOrdersMonth?.year ?? 0, 1, 1)}
@@ -134,17 +126,11 @@ const CollapseSalesFilter = ({
           <Tabs.Panel value="Year" className="px-4">
             <LoadingOverlay visible={isLoading} />
             <div className="max-w-[30%] flex flex-col gap-2">
-              <Select
-                data={memoProductData}
-                placeholder="Select Product"
-                clearable
-                onChange={(e) => {
-                  if (typeof handleSetProductId === 'function')
-                    handleSetProductId(e ?? '', 'Year');
-
-                  if (typeof handleDashboardOrdersYear === 'function')
-                    handleDashboardOrdersYear(e ?? '');
-                }}
+              <TextInput
+                placeholder="Search keyword product name"
+                icon={<IconSearch size={16} />}
+                w={280}
+                onChange={(e) => handleSearchKey(e.currentTarget.value)}
               />
               <YearPickerInput
                 placeholder="Select Year"

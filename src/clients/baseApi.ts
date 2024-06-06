@@ -42,6 +42,7 @@ const tagTypes: string[] = [
   'Category Performance',
   'Multiple Order',
   'Group Order',
+  'Manage User',
 ];
 
 const baseApi = createApi({

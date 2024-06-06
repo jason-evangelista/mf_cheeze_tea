@@ -6,5 +6,6 @@ const userSelectedValue: Partial<Record<keyof Account, boolean>> = {
   email: true,
   updated_at: true,
   username: true,
+  account_type: true,
 };
 export default userSelectedValue;

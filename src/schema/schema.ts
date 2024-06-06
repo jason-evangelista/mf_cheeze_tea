@@ -83,6 +83,8 @@ export const productSchema = yup.object().shape({
           .transform((value) => (isNaN(value) ? 0 : value))
           .required('Required amount for Serradura type'),
     }),
+
+  product_photo: yup.string(),
 });
 
 export const orderSchema = yup.object().shape({

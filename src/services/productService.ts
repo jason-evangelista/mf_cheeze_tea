@@ -29,10 +29,13 @@ const productApiService = baseApi.injectEndpoints({
         skip: number;
         showAll: boolean;
         searchKey?: string;
+        productType?: string;
       }
     >({
       query: (query) => ({
-        url: `/product?currentPage=${query.currentPage}&skip=${query.skip}&showAll=${query.showAll}&searchKey=${query.searchKey}`,
+        url: `/product?${new URLSearchParams(
+          query as unknown as Record<string, string>
+        ).toString()}`,
         method: 'GET',
       }),
       providesTags: ['Product'],

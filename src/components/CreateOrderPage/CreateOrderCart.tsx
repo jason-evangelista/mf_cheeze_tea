@@ -19,6 +19,7 @@ import {
   OrderCart,
 } from './CreateOrderContextProvider';
 
+import { DateValue } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/router';
@@ -34,6 +35,7 @@ export type PaymentDetailsParams = {
   change: number;
   customerName?: string;
   totalAmount: number;
+  orderDate: DateValue
 };
 
 const CreateOrderCart = ({ orderCart, ...rest }: CreateOrderCartProps) => {

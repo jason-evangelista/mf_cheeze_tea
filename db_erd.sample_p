@@ -1,0 +1,133 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id           String       @id @default(cuid())
+  username     String       @unique @db.VarChar(255)
+  email        String?      @unique @db.VarChar(255)
+  password     String       @db.LongText
+  token        String?      @db.LongText
+  created_at   DateTime     @default(now())
+  updated_at   DateTime     @updatedAt
+  status       Status       @default(ACTIVE)
+  account_type AccountType  @default(MEMBER)
+  reset_id     String?
+  Order        Order[]
+  GroupOrder   GroupOrder[]
+
+  @@map("accounts")
+}
+
+model Product {
+  id                  String            @id @default(cuid())
+  name                String
+  type_id             String
+  large_size_amount   Int?
+  regular_size_amount Int?
+  fixed_amount        Int?
+  type                ProductType
+  created_at          DateTime          @default(now())
+  updated_at          DateTime          @updatedAt
+  status              Status            @default(ACTIVE)
+  photo               String?
+  photo_asset_id      String?
+  Order               Order[]
+  GroupOrder          GroupOrder[]
+  ProductCategory     ProductCategory[]
+
+  @@fulltext([name])
+  @@map("products")
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  product_id      String
+  account_id      String
+  quantity_sale   Int
+  base_amount     Int
+  sub_total       Int
+  order_date      DateTime @db.Date
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  order_type_size String
+  status          Status   @default(ACTIVE)
+  product         Product  @relation(fields: [product_id], references: [id])
+  user            Account  @relation(fields: [account_id], references: [id])
+
+  @@index([product_id], map: "orders_product_id_fkey")
+  @@map("orders")
+}
+
+model GroupOrder {
+  id              String   @id @default(cuid())
+  account_id      String
+  product_id      String
+  snapshot_record String   @db.Text
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  change          Int
+  customer_name   String
+  payment         Int
+  total_amount    Int
+  status          Status   @default(ACTIVE)
+  order_date      DateTime @db.DateTime(0)
+  user            Account  @relation(fields: [account_id], references: [id])
+  product         Product  @relation(fields: [product_id], references: [id])
+
+  @@fulltext([customer_name])
+  @@map("group_orders")
+}
+
+model SalesTarget {
+  id         String          @id @default(cuid())
+  month      String?
+  year       Int?
+  target     Int
+  type       SalesTargetType
+  created_at DateTime        @default(now())
+  updated_at DateTime        @updatedAt
+
+  @@unique([month, year])
+  @@map("sales_targets")
+}
+
+model ProductCategory {
+  id         String   @id @default(cuid())
+  name       String   @unique
+  code       String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  product_id String?
+  Product    Product? @relation(fields: [product_id], references: [id])
+
+  @@map("product_categorys")
+}
+
+enum ProductType {
+  CHEEZE_TEA
+  MILK_TEA
+  SERRADURA
+  GREEN_TEA_AND_LEMONADE
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+enum SalesTargetType {
+  MONTH
+  YEAR
+}
+
+enum AccountType {
+  SUPER
+  MEMBER
+}

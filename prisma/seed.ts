@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 (async () => {
-  /*  await prisma.product.createMany({
+  await prisma.product.createMany({
     data: [
       {
         name: 'Green Tea Cheeze',
@@ -172,57 +172,8 @@ const prisma = new PrismaClient();
         fixed_amount: 0,
         type: 'CHEEZE_TEA',
       },
-      {
-        name: 'Tes 1',
-        large_size_amount: 100,
-        regular_size_amount: 50,
-        fixed_amount: 0,
-        type: 'CHEEZE_TEA',
-      },
-      {
-        name: 'Test 1',
-        large_size_amount: 100,
-        regular_size_amount: 50,
-        fixed_amount: 0,
-        type: 'MILK_TEA',
-      },
-      {
-        name: 'Tes 3',
-        large_size_amount: 100,
-        regular_size_amount: 50,
-        fixed_amount: 0,
-        type: 'CHEEZE_TEA',
-      },
-      {
-        name: 'tes 4',
-        large_size_amount: 100,
-        regular_size_amount: 50,
-        fixed_amount: 0,
-        type: 'CHEEZE_TEA',
-      },
-      {
-        name: 'Test 5',
-        large_size_amount: 100,
-        regular_size_amount: 50,
-        fixed_amount: 0,
-        type: 'CHEEZE_TEA',
-      },
-      {
-        name: 'asd',
-        large_size_amount: 2,
-        regular_size_amount: 1,
-        fixed_amount: 0,
-        type: 'CHEEZE_TEA',
-      },
-      {
-        name: 'asfdfsg',
-        large_size_amount: 45,
-        regular_size_amount: 3,
-        fixed_amount: 0,
-        type: 'CHEEZE_TEA',
-      },
     ],
-  }); */
+  });
 
   await prisma.productCategory.createMany({
     data: [

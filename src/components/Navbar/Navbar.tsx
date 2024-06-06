@@ -1,14 +1,11 @@
-import useToggleContainer from '@/hooks/useToggleContainer';
 import { UserContext } from '@/providers/AuthProvider';
-import { IconUser } from '@tabler/icons-react';
+import { Avatar, Menu, Text } from '@mantine/core';
+import { IconLogout } from '@tabler/icons-react';
 import jsCookie from 'js-cookie';
 import { useContext } from 'react';
-import Button from '../common/Button';
-import Menu from '../common/Menu';
+
 const Navbar = () => {
   const user = useContext(UserContext);
-
-  const { handleToggle, isOpen } = useToggleContainer();
 
   const handleLogout = () => {
     jsCookie.remove(process.env.NEXT_PUBLIC_COOKIE_NAME ?? '');
@@ -16,31 +13,28 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="flex-1 flex items-center justify-between px-4 text-white">
+    <nav className="flex-1 flex items-center justify-between px-4 text-white bg-orange-500">
       <div aria-label="logo">
         <h1 className="font-bold text-xl">Mf Cheeze Tea</h1>
       </div>
-      <div aria-label="user-option-menu" className="flex items-center gap-2">
-        <div
-          className="bg-gray-700 rounded-full w-8 h-8 relative flex items-center justify-center cursor-pointer"
-          onClick={handleToggle}
-        >
-          <IconUser color="white" />
-          <Menu isOpen={isOpen} key="user-option-menu">
-            <div className="text-sm flex flex-col">
-              <Button
-                btnTitle="Settings"
-                className="!text-black hover:bg-gray-200 px-4"
-              />
-              <Button
-                btnTitle="Log out"
-                className="!text-black hover:bg-gray-200 px-4"
-                onClick={handleLogout}
-              />
+      <div aria-label="user-option-menu">
+        <Menu position="left-start">
+          <Menu.Target>
+            <div className="flex items-center gap-2 cursor-pointer">
+              <Avatar src={null} radius="xl" />
+              <Text>{user?.username}</Text>
             </div>
-          </Menu>
-        </div>
-        <p>{user?.username}</p>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Item
+              icon={<IconLogout size={20} />}
+              onClick={handleLogout}
+              component="button"
+            >
+              Logout
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
       </div>
     </nav>
   );
